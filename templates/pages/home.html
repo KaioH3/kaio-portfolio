@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <h1 class="hero-title">Kaio H. Siqueira</h1>
+        <h2 class="hero-subtitle">Machine Learning Engineer</h2>
+        <p class="hero-description">
+            Especialista em ML/AI com foco em sistemas production-ready.
+            FastAPI, PyTorch, XGBoost, LangChain, RAG Systems.
+        </p>
+        <div class="hero-cta">
+            <a href="#projects" class="btn btn--primary">Ver Projetos</a>
+            <a href="https://github.com/kaioH3" class="btn btn--secondary" target="_blank">GitHub</a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.projects }}</div>
+                <div class="stat-label">Projetos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.technologies }}+</div>
+                <div class="stat-label">Tecnologias</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.experience }}</div>
+                <div class="stat-label">Experiência</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Skills Section -->
+<section id="skills" class="skills">
+    <div class="container">
+        <h2 class="section-title">Tech Stack</h2>
+        
+        <div class="skills-grid">
+            <div class="skill-category">
+                <h3>ML/AI</h3>
+                <div class="tech-tags">
+                    {% for tech in skills.ml_frameworks %}
+                    <span class="badge badge--primary">{{ tech }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <h3>Backend</h3>
+                <div class="tech-tags">
+                    {% for tech in skills.backend %}
+                    <span class="badge badge--secondary">{{ tech }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <h3>Frontend</h3>
+                <div class="tech-tags">
+                    {% for tech in skills.frontend %}
+                    <span class="badge badge--success">{{ tech }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <h3>DevOps</h3>
+                <div class="tech-tags">
+                    {% for tech in skills.devops %}
+                    <span class="badge badge--info">{{ tech }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Projects Section -->
+<section id="projects" class="projects">
+    <div class="container">
+        <h2 class="section-title">Projetos Destaque</h2>
+        
+        <div class="projects-grid">
+            {% for project in projects %}
+            <div class="card project-card">
+                <div class="card-header">
+                    <h3>{{ project.name }}</h3>
+                    <span class="badge badge--warning">{{ project.status }}</span>
+                </div>
+                <div class="card-body">
+                    <p>{{ project.description }}</p>
+                    
+                    <div class="project-tech">
+                        {% for tech in project.tech %}
+                        <span class="badge badge--small">{{ tech }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ project.url }}" class="btn btn--outline">Ver Projeto →</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  api:
+    image: localhost/kaio-portfolio-api:latest
+    build:
+      context: ..
+      dockerfile: containerfiles/Containerfile.api
+    container_name: kaio-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=production
+      - LOG_LEVEL=INFO
+      - PROMETHEUS_ENABLED=true
+    env_file:
+      - ../.env
+    volumes:
+      - ../logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - portfolio-network
+    labels:
+      - "app=kaio-portfolio"
+      - "tier=backend"
+
+networks:
+  portfolio-network:
+    driver: bridge

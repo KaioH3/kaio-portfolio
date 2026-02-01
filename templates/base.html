@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kaio H. Siqueira - ML Engineer Portfolio">
+    <title>{% block title %}Kaio H. - ML Engineer{% endblock %}</title>
+    
+    <!-- FrontRender CSS (3.48KB) -->
+    <link rel="stylesheet" href="/static/css/2-base.css">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="container">
+            <div class="nav-wrapper">
+                <a href="/" class="logo">Kaio<span class="accent">.ia</span></a>
+                <ul class="nav-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/#projects">Projetos</a></li>
+                    <li><a href="/#skills">Skills</a></li>
+                    <li><a href="https://github.com/kaioH3" target="_blank">GitHub</a></li>
+                    <li><a href="https://www.linkedin.com/in/kaiohsiqueira/" target="_blank">LinkedIn</a></li>
+                    <li><a href="https://medium.com/@KaioH3" target="_blank">Medium</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Kaio H. Siqueira. Production-ready com FastAPI + Podman.</p>
+            <p class="footer-tech">
+                <span class="badge">FastAPI</span>
+                <span class="badge">Podman</span>
+                <span class="badge">FrontRender 3.48KB</span>
+            </p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
