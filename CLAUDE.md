@@ -43,14 +43,16 @@ podman-compose -f deploy/podman-compose.yml up -d
 **Projects structure**: Each project lives under `app/projects/<name>/` with its own config, models, routes, services, and templates. Currently: `ragsystem` (active) and `creditrisk` (placeholder).
 
 **RAG service layer** (`app/projects/ragsystem/services/`):
-- `embeddings.py` — FastEmbed wrapper (CPU-only, BAAI/bge-small-en-v1.5)
+- `embeddings.py` — FastEmbed wrapper (CPU-only, paraphrase-multilingual-MiniLM-L12-v2)
 - `vector_store.py` — Qdrant embedded client
 - `document_processor.py` — PDF/TXT chunking (400-token chunks)
 - `retrieval.py` — Hybrid search (semantic + BM25 reranking)
-- `generation.py` — Multi-provider LLM with fallback chain: Groq -> Perplexity -> OpenAI -> Ollama
+- `generation.py` — Multi-provider LLM with fallback chain: Groq -> Perplexity -> OpenAI
 - `verification.py` — Chain-of-Verification to reduce hallucinations
 
-Services use a singleton pattern with `get_*_service()` factory functions.
+- `rate_limiter.py` — IP-based monthly query limit (persisted to JSON)
+
+Services use a singleton pattern with `get_*_service()` factory functions. Document processor uses SHA-256 content hashing for deduplication.
 
 **i18n**: `app/projects/ragsystem/i18n.py` provides PT-BR and EN-US translations. Detection order: query param `?lang=` -> cookie -> Accept-Language header -> default `en-US`.
 
@@ -64,7 +66,8 @@ Services use a singleton pattern with `get_*_service()` factory functions.
 GROQ_API_KEY          # Primary LLM provider (free tier)
 PERPLEXITY_API_KEY    # Backup LLM
 OPENAI_API_KEY        # Fallback LLM
-LLM_PROVIDER          # groq|perplexity|openai|ollama
+LLM_PROVIDER          # groq|perplexity|openai
+RATE_LIMIT_MONTHLY    # Per-IP monthly query cap (default: 15)
 ENV                   # development|production (controls /docs visibility)
 ```
 
