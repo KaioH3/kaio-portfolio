@@ -11,6 +11,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from app.core.config import settings
 from app.core.logging_config import setup_logging
 from app.routers import home, health
+from app.projects.ragsystem import routes as rag_routes
 
 # Initialize logging
 logger = setup_logging()
@@ -42,6 +43,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Include routers
 app.include_router(home.router, tags=["Home"])
 app.include_router(health.router, prefix="/api", tags=["Health"])
+app.include_router(rag_routes.router, tags=["RAG System"])
 
 # Prometheus metrics (only in production)
 if settings.PROMETHEUS_ENABLED:

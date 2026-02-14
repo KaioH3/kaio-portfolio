@@ -1,11 +1,7 @@
-"""
-Retrieval Service
-Hybrid search (semantic + keyword) with reranking
-"""
-from typing import List
-from rank_bm25 import BM25Okapi
-import numpy as np
+"""Retrieval Service - Hybrid search (semantic + BM25)"""
+from typing import List, Dict, Any, Optional
 import logging
+from rank_bm25 import BM25Okapi
 
 from ..config import rag_config
 from ..models import RetrievedChunk
@@ -16,128 +12,41 @@ logger = logging.getLogger(__name__)
 
 
 class RetrievalService:
-    """Hybrid retrieval with semantic + keyword search"""
-    
     def __init__(self):
-        self.embedding_service = get_embedding_service()
+        self.embeddings = get_embedding_service()
         self.vector_store = get_vector_store()
-        self.alpha = rag_config.HYBRID_ALPHA  # Weight for semantic vs keyword
-    
-    def retrieve(
-        self,
-        query: str,
-        top_k: int = None
+        self.top_k = rag_config.TOP_K_RETRIEVAL
+        self.alpha = rag_config.HYBRID_ALPHA
+
+    async def retrieve(
+        self, query: str, top_k: Optional[int] = None,
+        filter_dict: Optional[Dict[str, Any]] = None,
     ) -> List[RetrievedChunk]:
-        """
-        Hybrid retrieval: semantic search + keyword matching + reranking
-        
-        Args:
-            query: User query
-            top_k: Number of final results (default: config.TOP_K_RERANK)
-            
-        Returns:
-            List of retrieved and reranked chunks
-        """
-        if top_k is None:
-            top_k = rag_config.TOP_K_RERANK
-        
-        # Step 1: Semantic search (retrieve more for reranking)
-        initial_k = rag_config.TOP_K_RETRIEVAL
-        query_embedding = self.embedding_service.embed_query(query)
-        
-        semantic_results = self.vector_store.search(
-            query_embedding=query_embedding,
-            top_k=initial_k,
-            score_threshold=rag_config.MIN_SIMILARITY_SCORE
+        k = top_k or self.top_k
+        query_embedding = self.embeddings.embed_query(query)
+        chunks = self.vector_store.search(
+            query_embedding=query_embedding, top_k=k,
+            score_threshold=rag_config.MIN_SIMILARITY_SCORE,
+            filter_dict=filter_dict,
         )
-        
-        if not semantic_results:
-            logger.warning("No results found with semantic search")
-            return []
-        
-        # Step 2: Keyword matching (BM25) on retrieved results
-        bm25_scores = self._compute_bm25_scores(query, semantic_results)
-        
-        # Step 3: Hybrid scoring (combine semantic + BM25)
-        hybrid_results = self._combine_scores(
-            semantic_results,
-            bm25_scores,
-            alpha=self.alpha
-        )
-        
-        # Step 4: Reranking by hybrid score
-        reranked = sorted(
-            hybrid_results,
-            key=lambda x: x.rerank_score,
-            reverse=True
-        )[:top_k]
-        
-        logger.info(f"Retrieved {len(reranked)} chunks after reranking")
-        return reranked
-    
-    def _compute_bm25_scores(
-        self,
-        query: str,
-        chunks: List[RetrievedChunk]
-    ) -> List[float]:
-        """
-        Compute BM25 keyword scores
-        
-        Args:
-            query: User query
-            chunks: Retrieved chunks
-            
-        Returns:
-            List of BM25 scores (normalized 0-1)
-        """
-        # Tokenize documents
-        corpus = [chunk.text.lower().split() for chunk in chunks]
-        
-        # Build BM25 index
-        bm25 = BM25Okapi(corpus)
-        
-        # Score query
-        query_tokens = query.lower().split()
-        scores = bm25.get_scores(query_tokens)
-        
-        # Normalize to 0-1
-        max_score = max(scores) if max(scores) > 0 else 1.0
-        normalized = [score / max_score for score in scores]
-        
-        return normalized
-    
-    def _combine_scores(
-        self,
-        chunks: List[RetrievedChunk],
-        bm25_scores: List[float],
-        alpha: float
-    ) -> List[RetrievedChunk]:
-        """
-        Combine semantic and keyword scores
-        
-        Args:
-            chunks: Retrieved chunks with semantic scores
-            bm25_scores: BM25 keyword scores
-            alpha: Weight for semantic (1-alpha for keyword)
-            
-        Returns:
-            Chunks with combined rerank_score
-        """
-        for chunk, bm25_score in zip(chunks, bm25_scores):
-            # Hybrid score: alpha * semantic + (1-alpha) * keyword
-            chunk.rerank_score = (
-                alpha * chunk.score +
-                (1 - alpha) * bm25_score
-            )
-        
+        if len(chunks) > 1:
+            chunks = self._rerank_bm25(query, chunks)
+        return chunks[:rag_config.TOP_K_RERANK]
+
+    def _rerank_bm25(self, query: str, chunks: List[RetrievedChunk]) -> List[RetrievedChunk]:
+        tokenized = [c.text.lower().split() for c in chunks]
+        bm25 = BM25Okapi(tokenized)
+        scores = bm25.get_scores(query.lower().split())
+        for i, chunk in enumerate(chunks):
+            bm25_norm = scores[i] / (max(scores) + 1e-6)
+            chunk.rerank_score = self.alpha * chunk.score + (1 - self.alpha) * bm25_norm
+        chunks.sort(key=lambda c: c.rerank_score or 0, reverse=True)
         return chunks
 
 
-# Global singleton
 _retrieval_service = None
 
 def get_retrieval_service() -> RetrievalService:
-    """Get or create global retrieval service instance"""
     global _retrieval_service
     if _retrieval_service is None:
         _retrieval_service = RetrievalService()

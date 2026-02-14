@@ -1,115 +1,72 @@
 """
-Embeddings Service
-Local sentence-transformers embeddings (no API costs)
+Embeddings Service - FastEmbed
+CPU-only, no torch, ~50MB RAM, ONNX Runtime
 """
-from sentence_transformers import SentenceTransformer
-from typing import List, Union
+from typing import List
 import numpy as np
 import logging
 from functools import lru_cache
 
+from fastembed import TextEmbedding
 from ..config import rag_config
 
 logger = logging.getLogger(__name__)
 
 
 class EmbeddingService:
-    """Generate embeddings using local sentence-transformers model"""
-    
+    """Generate embeddings using FastEmbed (lightweight, CPU-first)"""
+
     def __init__(self):
         self.model_name = rag_config.EMBEDDING_MODEL
         self.dimension = rag_config.EMBEDDING_DIMENSION
         self.batch_size = rag_config.EMBEDDING_BATCH_SIZE
         self._model = None
-    
+
     @property
-    def model(self) -> SentenceTransformer:
-        """Lazy load embedding model"""
+    def model(self) -> TextEmbedding:
+        """Lazy load FastEmbed model"""
         if self._model is None:
-            logger.info(f"Loading embedding model: {self.model_name}")
-            self._model = SentenceTransformer(self.model_name)
-            logger.info(f"Model loaded successfully. Dimension: {self.dimension}")
+            logger.info(f"Loading FastEmbed model: {self.model_name}")
+            self._model = TextEmbedding(model_name=self.model_name)
+            logger.info(f"FastEmbed loaded (~50MB RAM). Dim: {self.dimension}")
         return self._model
-    
-    def embed_documents(self, texts: List[str]) -> List[np.ndarray]:
-        """
-        Embed multiple documents in batches
-        
-        Args:
-            texts: List of text strings to embed
-            
-        Returns:
-            List of embedding vectors
-        """
+
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """Embed multiple documents"""
         if not texts:
             return []
-        
         try:
-            # Generate embeddings in batches
-            embeddings = self.model.encode(
-                texts,
-                batch_size=self.batch_size,
-                show_progress_bar=len(texts) > 100,
-                convert_to_numpy=True,
-                normalize_embeddings=True  # L2 normalization for cosine similarity
-            )
-            
+            embeddings = list(self.model.embed(texts, batch_size=self.batch_size))
             logger.info(f"Generated {len(embeddings)} embeddings")
-            return embeddings.tolist()
-            
+            return [emb.tolist() for emb in embeddings]
         except Exception as e:
-            logger.error(f"Error generating embeddings: {str(e)}")
+            logger.error(f"Error generating embeddings: {e}")
             raise
-    
-    def embed_query(self, query: str) -> np.ndarray:
-        """
-        Embed a single query (optimized for search)
-        
-        Args:
-            query: Query string
-            
-        Returns:
-            Embedding vector
-        """
+
+    def embed_query(self, query: str) -> List[float]:
+        """Embed a single query"""
         try:
-            embedding = self.model.encode(
-                query,
-                convert_to_numpy=True,
-                normalize_embeddings=True
-            )
-            return embedding.tolist()
-            
+            embeddings = list(self.model.embed([query]))
+            return embeddings[0].tolist()
         except Exception as e:
-            logger.error(f"Error embedding query: {str(e)}")
+            logger.error(f"Error embedding query: {e}")
             raise
-    
+
     @lru_cache(maxsize=1000)
     def embed_query_cached(self, query: str) -> tuple:
-        """Cached version of embed_query for repeated queries"""
-        embedding = self.embed_query(query)
-        return tuple(embedding)  # Convert to tuple for hashability
-    
-    def compute_similarity(self, embedding1: np.ndarray, embedding2: np.ndarray) -> float:
-        """
-        Compute cosine similarity between two embeddings
-        
-        Args:
-            embedding1: First embedding vector
-            embedding2: Second embedding vector
-            
-        Returns:
-            Similarity score (0-1)
-        """
-        # Assuming embeddings are already normalized
-        similarity = np.dot(embedding1, embedding2)
-        return float(similarity)
+        """Cached version for repeated queries"""
+        return tuple(self.embed_query(query))
+
+    def compute_similarity(self, e1: List[float], e2: List[float]) -> float:
+        """Cosine similarity between two embeddings"""
+        v1, v2 = np.array(e1), np.array(e2)
+        return float(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
 
-# Global singleton instance
 _embedding_service = None
 
+
 def get_embedding_service() -> EmbeddingService:
-    """Get or create global embedding service instance"""
     global _embedding_service
     if _embedding_service is None:
         _embedding_service = EmbeddingService()

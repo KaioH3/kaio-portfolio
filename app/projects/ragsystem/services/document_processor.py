@@ -1,12 +1,10 @@
 """
-Document Processing Service
-PDF/TXT parsing, chunking, and text extraction
+Document Processing Service - PDF/TXT parsing + chunking
+Uses pypdf (not PyPDF2) for lighter footprint
 """
-import PyPDF2
-import tiktoken
 import hashlib
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from datetime import datetime
 import logging
 
@@ -17,117 +15,84 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentProcessor:
-    """Process documents into chunks for embedding"""
-    
     def __init__(self):
-        self.tokenizer = tiktoken.get_encoding("cl100k_base")  # GPT-4 tokenizer
         self.chunk_size = rag_config.CHUNK_SIZE
         self.chunk_overlap = rag_config.CHUNK_OVERLAP
-    
-    def process_file(self, file_path: Path, filename: str) -> Tuple[List[str], List[DocumentMetadata]]:
-        """
-        Process uploaded file into chunks with metadata
-        
-        Args:
-            file_path: Path to uploaded file
-            filename: Original filename
-            
-        Returns:
-            Tuple of (chunks, metadata_list)
-        """
+
+    def process_file(self, filepath: Path, filename: str) -> Tuple[List[str], List[DocumentMetadata]]:
+        """Process file into chunks with metadata"""
         try:
-            # Extract text based on file type
-            if file_path.suffix.lower() == '.pdf':
-                text = self._extract_pdf(file_path)
-            elif file_path.suffix.lower() in ['.txt', '.md']:
-                text = self._extract_text(file_path)
+            ext = Path(filename).suffix.lower()
+            if ext == ".pdf":
+                pages = self._extract_pdf_pages(filepath)
+                text = "\n\n".join(pages)
+            elif ext in {".txt", ".md"}:
+                text = filepath.read_text(encoding="utf-8")
+                pages = [text]
             else:
-                raise ValueError(f"Unsupported file type: {file_path.suffix}")
-            
-            # Generate document ID
+                raise ValueError(f"Unsupported file type: {ext}")
+
+            if not text.strip():
+                raise ValueError("Empty document")
+
             doc_id = self._generate_document_id(filename, text)
-            
-            # Create chunks
-            chunks = self._create_chunks(text)
-            
-            # Create metadata for each chunk
-            metadata_list = [
-                DocumentMetadata(
+            chunks, page_numbers = self._chunk_text_with_pages(pages)
+
+            metadatas = []
+            for i, chunk in enumerate(chunks):
+                metadatas.append(DocumentMetadata(
                     document_id=doc_id,
                     filename=filename,
                     chunk_index=i,
                     total_chunks=len(chunks),
-                    page_number=None  # TODO: Track page numbers in PDF
-                )
-                for i in range(len(chunks))
-            ]
-            
-            logger.info(f"Processed {filename}: {len(chunks)} chunks created")
-            return chunks, metadata_list
-            
+                    page_number=page_numbers[i],
+                ))
+
+            logger.info(f"Processed {filename}: {len(chunks)} chunks")
+            return chunks, metadatas
+
         except Exception as e:
-            logger.error(f"Error processing {filename}: {str(e)}")
+            logger.error(f"Error processing {filename}: {e}")
             raise
-    
-    def _extract_pdf(self, file_path: Path) -> str:
-        """Extract text from PDF file"""
-        text_parts = []
-        
-        with open(file_path, 'rb') as file:
-            pdf_reader = PyPDF2.PdfReader(file)
-            
-            for page_num, page in enumerate(pdf_reader.pages):
-                try:
-                    page_text = page.extract_text()
-                    if page_text.strip():
-                        text_parts.append(page_text)
-                except Exception as e:
-                    logger.warning(f"Error extracting page {page_num}: {e}")
-                    continue
-        
-        return "\n\n".join(text_parts)
-    
-    def _extract_text(self, file_path: Path) -> str:
-        """Extract text from TXT/MD file"""
-        with open(file_path, 'r', encoding='utf-8') as file:
-            return file.read()
-    
-    def _create_chunks(self, text: str) -> List[str]:
-        """
-        Split text into overlapping chunks based on token count
-        
-        Uses sliding window approach for better context preservation
-        """
-        # Tokenize entire text
-        tokens = self.tokenizer.encode(text)
-        
+
+    def _extract_pdf_pages(self, filepath: Path) -> List[str]:
+        """Extract text from PDF per page"""
+        from pypdf import PdfReader
+        reader = PdfReader(str(filepath))
+        pages = []
+        for page in reader.pages:
+            text = page.extract_text()
+            pages.append(text.strip() if text else "")
+        return pages
+
+    def _chunk_text_with_pages(self, pages: List[str]) -> Tuple[List[str], List[int]]:
+        """Chunk text while tracking which page each chunk came from"""
+        # Build word list with page tracking
+        words = []
+        word_pages = []
+        for page_num, page_text in enumerate(pages, 1):
+            page_words = page_text.split()
+            words.extend(page_words)
+            word_pages.extend([page_num] * len(page_words))
+
         chunks = []
-        start_idx = 0
-        
-        while start_idx < len(tokens):
-            # Get chunk tokens
-            end_idx = start_idx + self.chunk_size
-            chunk_tokens = tokens[start_idx:end_idx]
-            
-            # Decode back to text
-            chunk_text = self.tokenizer.decode(chunk_tokens)
-            
-            # Clean and add chunk
-            chunk_text = chunk_text.strip()
-            if chunk_text:
-                chunks.append(chunk_text)
-            
-            # Move window with overlap
-            start_idx += (self.chunk_size - self.chunk_overlap)
-        
-        return chunks
-    
+        page_numbers = []
+        start = 0
+        while start < len(words):
+            end = min(start + self.chunk_size, len(words))
+            chunk = " ".join(words[start:end])
+            if chunk.strip():
+                chunks.append(chunk.strip())
+                page_numbers.append(word_pages[start])
+            start += self.chunk_size - self.chunk_overlap
+
+        if not chunks and words:
+            chunks = [" ".join(words[:2000])]
+            page_numbers = [word_pages[0]]
+
+        return chunks, page_numbers
+
     def _generate_document_id(self, filename: str, content: str) -> str:
-        """Generate unique document ID from filename + content hash"""
         content_hash = hashlib.sha256(content.encode()).hexdigest()[:16]
-        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-        return f"{Path(filename).stem}_{timestamp}_{content_hash}"
-    
-    def count_tokens(self, text: str) -> int:
-        """Count tokens in text"""
-        return len(self.tokenizer.encode(text))
+        ts = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        return f"{Path(filename).stem}_{ts}_{content_hash}"

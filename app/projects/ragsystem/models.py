@@ -1,15 +1,11 @@
-"""
-Pydantic models for RAG system API
-Request/Response validation and serialization
-"""
-from pydantic import BaseModel, Field, validator
+"""Pydantic models for RAG system"""
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
 
 
 class DocumentStatus(str, Enum):
-    """Document processing status"""
     PENDING = "pending"
     PROCESSING = "processing"
     INDEXED = "indexed"
@@ -17,7 +13,6 @@ class DocumentStatus(str, Enum):
 
 
 class UploadResponse(BaseModel):
-    """Response after document upload"""
     document_id: str
     filename: str
     size_bytes: int
@@ -28,7 +23,6 @@ class UploadResponse(BaseModel):
 
 
 class DocumentMetadata(BaseModel):
-    """Metadata stored with each chunk"""
     document_id: str
     filename: str
     chunk_index: int
@@ -38,7 +32,6 @@ class DocumentMetadata(BaseModel):
 
 
 class RetrievedChunk(BaseModel):
-    """Retrieved document chunk with score"""
     text: str
     metadata: DocumentMetadata
     score: float
@@ -46,7 +39,6 @@ class RetrievedChunk(BaseModel):
 
 
 class VerificationStep(BaseModel):
-    """Single step in Chain-of-Verification"""
     step: str
     passed: bool
     confidence: float
@@ -54,31 +46,29 @@ class VerificationStep(BaseModel):
 
 
 class QueryRequest(BaseModel):
-    """RAG query request"""
     question: str = Field(..., min_length=3, max_length=500)
     top_k: int = Field(default=5, ge=1, le=20)
-    enable_verification: bool = Field(default=True)
-    
-    @validator('question')
+    enable_verification: bool = Field(default=False)
+
+    @field_validator("question")
+    @classmethod
     def question_not_empty(cls, v):
         if not v.strip():
-            raise ValueError('Question cannot be empty')
+            raise ValueError("Question cannot be empty")
         return v.strip()
 
 
 class QueryResponse(BaseModel):
-    """RAG query response with CoVe"""
     answer: str
     sources: List[RetrievedChunk]
-    verification_steps: List[VerificationStep]
+    verification_steps: List[VerificationStep] = []
     confidence_score: float = Field(ge=0.0, le=1.0)
     processing_time_ms: float
-    tokens_used: Dict[str, int]  # prompt, completion, total
+    tokens_used: Dict[str, int]
     metadata: Dict[str, Any] = {}
 
 
 class HealthCheck(BaseModel):
-    """RAG system health status"""
     status: str
     embedding_model_loaded: bool
     vector_store_connected: bool
@@ -90,7 +80,6 @@ class HealthCheck(BaseModel):
 
 
 class ErrorResponse(BaseModel):
-    """Standardized error response"""
     error: str
     detail: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)

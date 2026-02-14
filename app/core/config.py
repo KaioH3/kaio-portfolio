@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
     
     model_config = SettingsConfigDict(
+        extra='ignore',  # permite PERPLEXITY_API_KEY, etc.
+        
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False

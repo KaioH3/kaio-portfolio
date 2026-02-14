@@ -1,21 +1,15 @@
-"""
-RAG System Routes - Production-Ready
-Demonstrates production trade-offs and engineering maturity
-"""
-from fastapi import APIRouter, UploadFile, File, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+"""RAG System API Routes - WITH i18n + HTMX Support"""
+from fastapi import APIRouter, UploadFile, File, Request, HTTPException, Form
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-import logging
 import time
+import logging
 import tempfile
-import os
-from datetime import datetime
 
-from .config import rag_config
 from .models import (
-    QueryRequest, QueryResponse, UploadResponse, 
-    HealthCheck, ErrorResponse, DocumentStatus
+    QueryRequest, QueryResponse, UploadResponse,
+    HealthCheck, DocumentStatus,
 )
 from .services.document_processor import DocumentProcessor
 from .services.embeddings import get_embedding_service
@@ -23,367 +17,206 @@ from .services.vector_store import get_vector_store
 from .services.retrieval import get_retrieval_service
 from .services.generation import get_generation_service
 from .services.verification import get_verification_service
+from .services.rate_limiter import get_rate_limiter
+from .config import rag_config
+from .i18n import t, get_language_from_request
 
 logger = logging.getLogger(__name__)
 
-# Router
 router = APIRouter(prefix="/rag-system", tags=["RAG System"])
 
-# Templates
-templates = Jinja2Templates(directory="app/projects/ragsystem/templates")
+templates = Jinja2Templates(
+    directory=[
+        str(Path(__file__).parent / "templates"),
+        str(Path(__file__).resolve().parent.parent.parent.parent / "templates"),
+    ]
+)
 
-# Services (lazy loaded para economizar RAM)
-doc_processor = DocumentProcessor()
+templates.env.globals["t"] = t
 
-
-# ========================================
-# FRONTEND ROUTES
-# ========================================
 
 @router.get("/", response_class=HTMLResponse)
 async def rag_index(request: Request):
-    """
-    Main RAG system interface
-    
-    Trade-off: Server-side rendering (Jinja2) vs SPA (React)
-    Decision: SSR - Faster initial load, better SEO, menos código JS
-    """
+    """Main RAG interface with i18n"""
+    lang = get_language_from_request(request)
     return templates.TemplateResponse(
-        "rag_index.html",
-        {
-            "request": request,
-            "config": {
-                "embedding_model": rag_config.EMBEDDING_MODEL,
-                "llm_provider": rag_config.LLM_PROVIDER.upper(),
-                "max_file_size_mb": rag_config.MAX_FILE_SIZE_MB,
-                "allowed_extensions": list(rag_config.ALLOWED_EXTENSIONS)
-            }
-        }
+        "rag_index.html", 
+        {"request": request, "lang": lang}
     )
 
 
-# ========================================
-# API ROUTES - CORE FUNCTIONALITY
-# ========================================
-
-@router.post("/upload", response_model=UploadResponse)
-async def upload_document(file: UploadFile = File(...)):
-    """
-    Upload and process document (PDF, TXT, MD)
-    
-    Pipeline:
-    1. Validate file (type, size)
-    2. Extract text → chunks (tiktoken)
-    3. Generate embeddings (local MiniLM - R$0)
-    4. Store in vector DB (Qdrant embedded - R$0)
-    5. Update BM25 index (for hybrid search)
-    
-    Trade-offs demonstrated:
-    - Sync processing vs async job queue
-      → Sync: Simpler, sufficient for <10MB files
-    - Single file vs batch upload
-      → Single: Better UX feedback, easier error handling
-    """
-    start_time = time.time()
-    tmp_path = None
+@router.post("/upload", response_class=HTMLResponse)
+async def upload_document(request: Request, file: UploadFile = File(...)):
+    """Upload and index document - HTMX endpoint"""
+    start = time.time()
+    lang = get_language_from_request(request)
     
     try:
-        # === VALIDATION ===
-        file_ext = Path(file.filename).suffix.lower()
-        if file_ext not in rag_config.ALLOWED_EXTENSIONS:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid file type. Allowed: {rag_config.ALLOWED_EXTENSIONS}"
-            )
+        ext = Path(file.filename).suffix.lower()
+        if ext not in rag_config.ALLOWED_EXTENSIONS:
+            return f'<div class="result error">{t("upload_error_type", lang, ext=ext)}</div>'
         
-        # Check file size
-        file.file.seek(0, 2)
-        file_size = file.file.tell()
-        file.file.seek(0)
+        content = await file.read()
+        max_bytes = rag_config.MAX_FILE_SIZE_MB * 1024 * 1024
+        if len(content) > max_bytes:
+            return f'<div class="result error">{t("upload_error_size", lang, max_mb=rag_config.MAX_FILE_SIZE_MB)}</div>'
         
-        max_size = rag_config.MAX_FILE_SIZE_MB * 1024 * 1024
-        if file_size > max_size:
-            raise HTTPException(
-                status_code=400,
-                detail=f"File too large. Max: {rag_config.MAX_FILE_SIZE_MB}MB"
-            )
+        with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
+            tmp.write(content)
+            tmp_path = Path(tmp.name)
         
-        # === PROCESSING ===
-        # Save to temp file (trade-off: memory vs disk)
-        # Decision: Disk - Safer for larger files, prevents OOM
-        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
-            content = await file.read()
-            tmp_file.write(content)
-            tmp_path = Path(tmp_file.name)
+        try:
+            processor = DocumentProcessor()
+            chunks, metadatas = processor.process_file(tmp_path, file.filename)
+
+            vs = get_vector_store()
+            doc_id = metadatas[0].document_id
+            if vs.document_exists(doc_id):
+                vs.delete_document(doc_id)
+                logger.info(f"Replaced existing document: {doc_id}")
+
+            emb_service = get_embedding_service()
+            embeddings = emb_service.embed_documents(chunks)
+            vs.add_documents(chunks, embeddings, metadatas)
+            
+            elapsed = (time.time() - start) * 1000
+            
+            return f'''<div class="result success">
+                {t("upload_success", lang, filename=file.filename, chunks=len(chunks), time_ms=elapsed)}
+            </div>'''
         
-        logger.info(f"Processing: {file.filename} ({file_size} bytes)")
-        
-        # Step 1: Extract text and create chunks
-        chunks, metadata_list = doc_processor.process_file(tmp_path, file.filename)
-        
-        if not chunks:
-            raise HTTPException(
-                status_code=400,
-                detail="No text content extracted from document"
-            )
-        
-        # Step 2: Generate embeddings (local model - R$0)
-        embedding_service = get_embedding_service()
-        embeddings = embedding_service.embed_documents(chunks)
-        
-        # Step 3: Store in Qdrant (embedded mode - R$0)
-        vector_store = get_vector_store()
-        point_ids = vector_store.add_documents(chunks, embeddings, metadata_list)
-        
-        # Step 4: Update BM25 index for hybrid search
-        retrieval_service = get_retrieval_service()
-        retrieval_service.update_bm25_index(
-            chunks,
-            [meta.dict() for meta in metadata_list]
-        )
-        
-        processing_time = (time.time() - start_time) * 1000
-        
-        logger.info(
-            f"✅ Indexed: {file.filename} | "
-            f"{len(chunks)} chunks | "
-            f"{processing_time:.0f}ms | "
-            f"R$0 cost"  # Emphasis on cost savings
-        )
-        
-        return UploadResponse(
-            document_id=metadata_list[0].document_id,
-            filename=file.filename,
-            size_bytes=file_size,
-            chunks_created=len(chunks),
-            status=DocumentStatus.INDEXED,
-            processing_time_ms=processing_time,
-            message=f"Successfully indexed {len(chunks)} chunks (R$0 embedding cost)"
-        )
+        finally:
+            tmp_path.unlink(missing_ok=True)
     
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"Upload error: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-    
-    finally:
-        # Cleanup temp file
-        if tmp_path and tmp_path.exists():
-            os.unlink(tmp_path)
+        logger.error(f"Upload error: {e}")
+        return f'<div class="result error">{t("upload_error", lang, error=str(e))}</div>'
 
 
-@router.post("/query", response_model=QueryResponse)
-async def query_documents(req: QueryRequest):
-    """
-    Query indexed documents with RAG + Chain-of-Verification
-    
-    Pipeline:
-    1. Hybrid retrieval (semantic + BM25)
-    2. Reranking (score fusion)
-    3. Generation (Groq → Perplexity → Ollama fallback)
-    4. Verification (CoVe - reduce hallucinations)
-    
-    Trade-offs demonstrated:
-    - Retrieval: Hybrid (semantic + keyword) vs pure semantic
-      → Hybrid: +15% accuracy, minimal latency cost
-    - Generation: Cloud API vs local model
-      → Groq API: 300 tok/s vs Ollama 15 tok/s, free tier OK
-    - Verification: Always-on CoVe vs on-demand
-      → Always-on: Better quality, +100ms acceptable
-    """
-    start_time = time.time()
-    
+@router.post("/query", response_class=HTMLResponse)
+async def query_documents(
+    request: Request,
+    question: str = Form(...),
+    enable_verification: str = Form("false"),
+    top_k: int = Form(5)
+):
+    """Query documents - HTMX endpoint"""
+    start = time.time()
+    lang = get_language_from_request(request)
+    enable_verify = enable_verification.lower() == "true"
+
+    client_ip = request.client.host if request.client else "unknown"
+    limiter = get_rate_limiter()
+    allowed, remaining = limiter.check(client_ip)
+    if not allowed:
+        return f'<div class="result error">{t("query_rate_limited", lang, limit=rag_config.RATE_LIMIT_MONTHLY)}</div>'
+
     try:
-        logger.info(f"Query: {req.question[:50]}...")
-        
-        # === STEP 1: RETRIEVAL (Hybrid Search) ===
-        retrieval_service = get_retrieval_service()
-        chunks = retrieval_service.retrieve(
-            req.question,
-            top_k=req.top_k,
-            enable_hybrid=True  # Hybrid = +15% accuracy
-        )
+        retrieval = get_retrieval_service()
+        chunks = await retrieval.retrieve(question, top_k=top_k)
         
         if not chunks:
-            # Graceful degradation - no docs indexed yet
-            return QueryResponse(
-                answer="I don't have any documents indexed yet. Please upload documents first.",
-                sources=[],
-                verification_steps=[],
-                confidence_score=0.0,
-                processing_time_ms=(time.time() - start_time) * 1000,
-                tokens_used={"prompt": 0, "completion": 0, "total": 0},
-                metadata={"status": "no_documents"}
-            )
+            return f'<div class="result">{t("query_no_documents", lang)}</div>'
         
-        # === STEP 2: GENERATION (Multi-Provider with Fallback) ===
-        generation_service = get_generation_service()
+        gen = get_generation_service()
+        result = await gen.generate(question, chunks)
+        remaining = limiter.increment(client_ip)
+
+        verification_html = ""
+        confidence = 0.8
         
-        answer, tokens_used = await generation_service.generate(
-            query=req.question,
-            context_chunks=chunks,
-            enable_cove=req.enable_verification
-        )
+        if enable_verify:
+            verifier = get_verification_service()
+            steps = verifier.verify(result["answer"], chunks)
+            confidence = sum(s.confidence for s in steps) / max(len(steps), 1)
+            
+            steps_html = "".join([
+                f'''<div class="verification-step">
+                    {t("verification_step", lang,
+                       step=s.step,
+                       status=t("verification_passed" if s.passed else "verification_failed", lang),
+                       confidence=s.confidence)}
+                    <br><small>{s.details}</small>
+                </div>'''
+                for s in steps
+            ])
+            
+            verification_html = f'''<div class="verification">
+                <h4>{t("verification_title", lang)}</h4>
+                {steps_html}
+            </div>'''
         
-        # === STEP 3: VERIFICATION (Chain-of-Verification) ===
-        verification_steps = []
-        confidence_score = 1.0
+        sources_html = "".join([
+            f'''<div class="source">
+                [{i+1}] <strong>{c.metadata.filename}</strong>
+                (p. {c.metadata.page_number}, chunk {c.metadata.chunk_index}/{c.metadata.total_chunks})
+                <br><small>Score: {c.score:.3f}</small>
+            </div>'''
+            for i, c in enumerate(chunks[:3])
+        ])
         
-        if req.enable_verification:
-            verification_service = get_verification_service()
-            verification_steps, confidence_score = verification_service.verify_answer(
-                query=req.question,
-                answer=answer,
-                context_chunks=chunks
-            )
+        elapsed = (time.time() - start) * 1000
         
-        processing_time = (time.time() - start_time) * 1000
-        
-        # === METRICS LOGGING (Production Monitoring) ===
-        logger.info(
-            f"✅ Query completed | "
-            f"{processing_time:.0f}ms | "
-            f"{len(chunks)} sources | "
-            f"confidence: {confidence_score:.2f} | "
-            f"tokens: {tokens_used['total']} | "
-            f"provider: {rag_config.LLM_PROVIDER}"
-        )
-        
-        return QueryResponse(
-            answer=answer,
-            sources=chunks,
-            verification_steps=verification_steps,
-            confidence_score=confidence_score,
-            processing_time_ms=processing_time,
-            tokens_used=tokens_used,
-            metadata={
-                "llm_provider": rag_config.LLM_PROVIDER,
-                "hybrid_search": True,
-                "cove_enabled": req.enable_verification,
-                "cost_estimate": "R$0 (free tier)"  # Business metric
-            }
-        )
+        return f'''<div class="result answer">
+            <h3>{t("query_answer_title", lang)}</h3>
+            <p>{result["answer"]}</p>
+            
+            <h3>{t("query_sources_title", lang)}</h3>
+            <div class="sources">{sources_html}</div>
+            
+            {verification_html}
+            
+            <div class="metadata">
+                {t("query_metadata", lang,
+                   confidence=confidence,
+                   time_ms=elapsed,
+                   model=result.get("model", "unknown"))}
+                <br><small>{t("query_remaining", lang,
+                   remaining=remaining,
+                   limit=rag_config.RATE_LIMIT_MONTHLY)}</small>
+            </div>
+        </div>'''
     
     except Exception as e:
-        logger.error(f"Query error: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Query processing failed: {str(e)}"
-        )
+        logger.error(f"Query error: {e}")
+        return f'<div class="result error">{t("query_error", lang, error=str(e))}</div>'
 
 
 @router.get("/health", response_model=HealthCheck)
 async def health_check():
-    """
-    Comprehensive health check
-    
-    Trade-off: Simple ping vs deep health check
-    Decision: Deep check - Catches issues before users hit them
-    
-    Checks:
-    1. Embedding model loaded (lazy loaded on first use)
-    2. Vector store accessible
-    3. LLM provider reachable
-    4. Resource usage within limits
-    """
+    """System health check"""
+    emb_loaded = False
+    vs_connected = False
+    total_chunks = 0
+
     try:
-        # Check embedding service
-        embedding_service = get_embedding_service()
-        embedding_loaded = embedding_service._model is not None
-        
-        # Check vector store
-        vector_store = get_vector_store()
-        try:
-            stats = vector_store.get_stats()
-            vector_connected = True
-            total_docs = stats.get("total_points", 0)
-        except:
-            vector_connected = False
-            total_docs = 0
-        
-        # Check LLM provider (lightweight check)
-        llm_available = True  # Assume available, actual check on first query
-        
-        # Overall status
-        all_healthy = embedding_loaded and vector_connected and llm_available
-        status = "healthy" if all_healthy else "degraded"
-        
-        return HealthCheck(
-            status=status,
-            embedding_model_loaded=embedding_loaded,
-            vector_store_connected=vector_connected,
-            llm_provider=rag_config.LLM_PROVIDER,
-            llm_available=llm_available,
-            total_documents=total_docs,
-            total_chunks=total_docs,
-            timestamp=datetime.utcnow()
-        )
-    
-    except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        return HealthCheck(
-            status="unhealthy",
-            embedding_model_loaded=False,
-            vector_store_connected=False,
-            llm_provider=rag_config.LLM_PROVIDER,
-            llm_available=False,
-            total_documents=0,
-            total_chunks=0,
-            timestamp=datetime.utcnow()
-        )
+        emb = get_embedding_service()
+        _ = emb.model
+        emb_loaded = True
+    except Exception:
+        pass
 
-
-@router.get("/stats")
-async def get_stats():
-    """
-    System statistics for monitoring
-    
-    Production-ready metrics for observability
-    """
     try:
-        vector_store = get_vector_store()
-        stats = vector_store.get_stats()
-        
-        return {
-            "status": "operational",
-            "storage": {
-                "total_documents": stats.get("total_points", 0),
-                "total_chunks": stats.get("vectors_count", 0),
-                "indexed_vectors": stats.get("indexed_vectors_count", 0),
-            },
-            "config": {
-                "embedding_model": rag_config.EMBEDDING_MODEL,
-                "embedding_dimension": rag_config.EMBEDDING_DIMENSION,
-                "llm_provider": rag_config.LLM_PROVIDER,
-                "chunk_size": rag_config.CHUNK_SIZE,
-                "top_k_default": rag_config.TOP_K_RERANK,
-            },
-            "cost": {
-                "embeddings": "R$0/month (local)",
-                "vector_db": "R$0/month (embedded)",
-                "llm": "R$0/month (free tier)",
-                "total": "R$0/month",
-            },
-            "timestamp": datetime.utcnow().isoformat()
-        }
-    except Exception as e:
-        logger.error(f"Stats error: {e}")
-        return {"status": "error", "message": str(e)}
+        vs = get_vector_store()
+        stats = vs.get_stats()
+        vs_connected = True
+        total_chunks = stats.get("total_points", 0)
+    except Exception:
+        pass
 
-
-# ========================================
-# ERROR HANDLERS
-# ========================================
-
-@router.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    """Standardized error responses"""
-    return JSONResponse(
-        status_code=exc.status_code,
-        content=ErrorResponse(
-            error=exc.detail,
-            detail=f"Status {exc.status_code}",
-            timestamp=datetime.utcnow()
-        ).dict()
+    return HealthCheck(
+        status="healthy" if emb_loaded and vs_connected else "degraded",
+        embedding_model_loaded=emb_loaded,
+        vector_store_connected=vs_connected,
+        llm_provider=rag_config.LLM_PROVIDER,
+        llm_available=bool(rag_config.GROQ_API_KEY or rag_config.PERPLEXITY_API_KEY),
+        total_documents=0,
+        total_chunks=total_chunks,
     )
+
+
+@router.delete("/documents/{document_id}")
+async def delete_document(document_id: str):
+    vs = get_vector_store()
+    vs.delete_document(document_id)
+    return {"status": "deleted", "document_id": document_id}
