@@ -17,7 +17,7 @@ services:
     env_file:
       - ../.env
     volumes:
-      - ../logs:/app/logs
+      - rag-data:/app/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 30s
@@ -29,6 +29,9 @@ services:
     labels:
       - "app=kaio-portfolio"
       - "tier=backend"
+
+volumes:
+  rag-data:
 
 networks:
   portfolio-network:

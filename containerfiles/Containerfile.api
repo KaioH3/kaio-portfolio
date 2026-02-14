@@ -25,9 +25,14 @@ COPY app/ ./app/
 COPY templates/ ./templates/
 COPY static/ ./static/
 
+# Create data directory for Qdrant embedded storage
+RUN mkdir -p /app/data
+
 # Create non-root user (security best practice)
 RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
+
+VOLUME /app/data
 
 # Switch to non-root user
 USER appuser

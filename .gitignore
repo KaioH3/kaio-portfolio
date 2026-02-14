@@ -16,5 +16,17 @@ logs/
 # Testing
 .pytest_cache/
 
+# Data
+data/
+
+# Linting
+.ruff_cache/
+
+# Claude Code
+.claude/
+
+# Backups
+*.backup
+
 # OS
 .DS_Store
