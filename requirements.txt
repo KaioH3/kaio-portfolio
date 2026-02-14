@@ -1,7 +1,7 @@
 # FastAPI Core
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
-python-multipart==0.0.9
+python-multipart>=0.0.9,<0.0.15
 
 # Templates
 jinja2==3.1.4
@@ -18,3 +18,13 @@ prometheus-fastapi-instrumentator==7.0.0
 pytest==8.3.3
 pytest-asyncio==0.24.0
 httpx==0.27.2
+
+# RAG System Dependencies
+sentence-transformers==2.3.1
+qdrant-client==1.7.3
+PyPDF2==3.0.1
+tiktoken==0.5.2
+openai==1.12.0
+rank-bm25==0.2.2
+numpy==1.26.3
+tenacity==8.2.3

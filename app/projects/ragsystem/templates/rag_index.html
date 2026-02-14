@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Document Intelligence | Production Demo</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stat-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .upload-zone {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-zone:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+        }
+        
+        .upload-zone input[type="file"] {
+            display: none;
+        }
+        
+        .query-box {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        input[type="text"], textarea {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result-card {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .confidence {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .confidence.high {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .confidence.medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .confidence.low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .answer {
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .sources {
+            margin-top: 1rem;
+        }
+        
+        .source-item {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .verification-steps {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .verification-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .step-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .step-icon.pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .step-icon.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .htmx-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .cost-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header" style="position: relative;">
+            <div class="cost-badge">💰 R$0/month</div>
+            <h1>🧠 RAG Document Intelligence</h1>
+            <p class="subtitle">Production-ready Retrieval-Augmented Generation with Chain-of-Verification</p>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <span>📊 Embeddings:</span>
+                    <span class="stat-badge">{{ config.embedding_model.split('/')[-1] }} (Local)</span>
+                </div>
+                <div class="stat-item">
+                    <span>🤖 LLM:</span>
+                    <span class="stat-badge">{{ config.llm_provider }}</span>
+                </div>
+                <div class="stat-item">
+                    <span>🔍 Search:</span>
+                    <span class="stat-badge">Hybrid (Semantic + BM25)</span>
+                </div>
+                <div class="stat-item">
+                    <span>✅ Verification:</span>
+                    <span class="stat-badge">CoVe Enabled</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Upload Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    📤 Upload Document
+                </h2>
+                
+                <form hx-post="/rag-system/upload" 
+                      hx-encoding="multipart/form-data" 
+                      hx-target="#upload-result"
+                      hx-indicator="#upload-spinner">
+                    
+                    <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+                        <p style="font-size: 3rem; margin-bottom: 0.5rem;">📄</p>
+                        <p style="font-weight: 600; margin-bottom: 0.25rem;">Click to upload or drag & drop</p>
+                        <p style="font-size: 0.85rem; color: #666;">
+                            PDF, TXT, MD (max {{ config.max_file_size_mb }}MB)
+                        </p>
+                        <input type="file" 
+                               id="file-input" 
+                               name="file" 
+                               accept=".pdf,.txt,.md"
+                               onchange="this.form.dispatchEvent(new Event('submit', {cancelable: true}))">
+                    </div>
+                    
+                    <div id="upload-result" style="margin-top: 1rem;"></div>
+                    <div id="upload-spinner" class="htmx-indicator" style="margin-top: 1rem;"></div>
+                </form>
+            </div>
+            
+            <!-- Query Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    💬 Ask Questions
+                </h2>
+                
+                <form hx-post="/rag-system/query"
+                      hx-target="#query-result"
+                      hx-indicator="#query-spinner">
+                    
+                    <div class="query-box">
+                        <input type="text" 
+                               name="question" 
+                               placeholder="Ask a question about your documents..."
+                               required>
+                        <button type="submit">Search</button>
+                    </div>
+                    
+                    <div id="query-result"></div>
+                    <div id="query-spinner" class="htmx-indicator"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-format upload response
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            if (event.detail.target.id === 'upload-result') {
+                const data = JSON.parse(event.detail.xhr.response);
+                event.detail.target.innerHTML = `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <span style="font-weight: 600;">✅ Upload Successful</span>
+                            <span style="font-size: 0.85rem; color: #666;">${data.processing_time_ms.toFixed(0)}ms</span>
+                        </div>
+                        <p><strong>File:</strong> ${data.filename}</p>
+                        <p><strong>Chunks created:</strong> ${data.chunks_created}</p>
+                        <p><strong>Cost:</strong> R$0 (local embeddings)</p>
+                    </div>
+                `;
+            }
+            
+            if (event.detail.target.id === 'query-result') {
+                const data = JSON.parse(event.detail.xhr.response);
+                const confidenceClass = data.confidence_score > 0.8 ? 'high' : data.confidence_score > 0.5 ? 'medium' : 'low';
+                
+                let sourcesHtml = '';
+                if (data.sources && data.sources.length > 0) {
+                    sourcesHtml = '<div class="sources"><strong>📚 Sources:</strong>';
+                    data.sources.forEach((source, i) => {
+                        sourcesHtml += `
+                            <div class="source-item">
+                                [${i+1}] ${source.metadata.filename} (chunk ${source.metadata.chunk_index + 1}, score: ${source.score.toFixed(3)})
+                            </div>
+                        `;
+                    });
+                    sourcesHtml += '</div>';
+                }
+                
+                let verificationHtml = '';
+                if (data.verification_steps && data.verification_steps.length > 0) {
+                    verificationHtml = '<div class="verification-steps"><strong>🔍 Verification:</strong>';
+                    data.verification_steps.forEach(step => {
+                        const icon = step.passed ? '✓' : '✗';
+                        const iconClass = step.passed ? 'pass' : 'fail';
+                        verificationHtml += `
+                            <div class="verification-step">
+                                <span class="step-icon ${iconClass}">${icon}</span>
+                                <span>${step.step}: ${step.details}</span>
+                            </div>
+                        `;
+                    });
+                    verificationHtml += '</div>';
+                }
+                
+                event.detail.target.innerHTML = `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <span style="font-weight: 600;">💡 Answer</span>
+                            <div>
+                                <span class="confidence ${confidenceClass}">
+                                    Confidence: ${(data.confidence_score * 100).toFixed(0)}%
+                                </span>
+                                <span style="margin-left: 1rem; font-size: 0.85rem; color: #666;">
+                                    ${data.processing_time_ms.toFixed(0)}ms | ${data.tokens_used.total} tokens
+                                </span>
+                            </div>
+                        </div>
+                        <div class="answer">${data.answer}</div>
+                        ${sourcesHtml}
+                        ${verificationHtml}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
