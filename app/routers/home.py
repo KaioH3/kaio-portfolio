@@ -31,7 +31,7 @@ async def home(request: Request):
             "name": "RAG Document Intelligence",
             "description": "Sistema modular com Chain-of-Verification que reduz alucinações em 50%",
             "tech": ["FastAPI", "LangChain", "Qdrant", "GPT-4o"],
-            "status": "Em breve",
+            "status": "Ativo",
             "url": "/rag-system"
         },
         {
