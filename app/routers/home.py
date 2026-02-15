@@ -19,7 +19,7 @@ async def home(request: Request):
     
     # Skills data
     skills = {
-        "ml_frameworks": ["PyTorch", "TensorFlow", "XGBoost", "LangChain"],
+        "ml_frameworks": ["PyTorch", "TensorFlow", "XGBoost", "FastEmbed"],
         "backend": ["FastAPI", "Python 3.11+", "Podman", "PostgreSQL"],
         "frontend": ["FrontRender", "Jinja2", "Pure CSS", "Responsive Design"],
         "devops": ["Podman Compose", "Caddy", "Prometheus", "Grafana", "GitHub Actions"]
@@ -30,7 +30,7 @@ async def home(request: Request):
         {
             "name": "RAG Document Intelligence",
             "description": "Sistema modular com Chain-of-Verification que reduz alucinações em 50%",
-            "tech": ["FastAPI", "LangChain", "Qdrant", "GPT-4o"],
+            "tech": ["FastAPI", "FastEmbed", "Qdrant", "Groq"],
             "status": "Ativo",
             "url": "/rag-system"
         },
