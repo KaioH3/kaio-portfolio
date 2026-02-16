@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="landing-page">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aprenda técnicas profissionais de unha gel e fature até R$ 3.000/mês trabalhando em casa. Curso completo com certificado.">
+    <meta name="keywords" content="curso unha gel, manicure profissional, trabalhar em casa, renda extra">
+
+    <!-- Open Graph (social sharing) -->
+    <meta property="og:title" content="{{ course.name }} - Fature até R$ 3.000/mês">
+    <meta property="og:description" content="Transforme sua paixão em negócio lucrativo. Curso completo com certificado reconhecido.">
+    <meta property="og:type" content="website">
+
+    <title>{{ course.name }} - Trabalhe em Casa e Fature R$ 3.000/mês</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="alternate icon" href="/static/favicon.ico">
+    <link rel="apple-touch-icon" href="/static/favicon.svg">
+
+    <!-- Preload critical resources (performance) -->
+    <link rel="preload" href="/static/landing.css" as="style">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/static/css/1-variables.css">
+    <link rel="stylesheet" href="/static/css/2-base.css">
+    <link rel="stylesheet" href="/static/landing.css">
+
+    <!-- NO external JavaScript libraries (vanilla only for performance) -->
+
+    <!-- GoatCounter Analytics (Privacy-friendly, GDPR compliant, no cookies) -->
+    {% if goatcounter_code %}
+    <script data-goatcounter="https://{{ goatcounter_code }}.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+    {% endif %}
+</head>
+<body>
+
+<!-- ========================================
+     SECTION 1: HERO (Above the Fold)
+     CONVERSION GOAL: Capture attention + scroll
+     ======================================== -->
+<section class="hero-landing">
+    <div class="section-container">
+        <h1 class="hero-title">
+            Transforme Suas Unhas em <em>Obras de Arte</em><br>
+            e Fature até R$ 3.000/Mês
+        </h1>
+        <p class="hero-subtitle">
+            O método completo para dominar a técnica profissional de unha gel
+            e construir um negócio lucrativo trabalhando em casa
+        </p>
+
+        <!-- CTA #1: Primary (above fold) -->
+        <a href="#preco" class="cta-button cta-large" id="cta-hero">
+            🎯 QUERO COMEÇAR AGORA
+        </a>
+
+        <!-- Trust indicators (reduce friction) -->
+        <div class="trust-badges">
+            <span>✅ Certificado Reconhecido</span>
+            <span>✅ Acesso Vitalício</span>
+            <span>✅ Garantia 7 Dias</span>
+            <span>✅ 500+ Alunas</span>
+        </div>
+    </div>
+</section>
+
+<!-- ========================================
+     SECTION 2: PROBLEMA (Problem Agitation)
+     PSYCHOLOGY: Touch pain points before solution
+     ======================================== -->
+<section class="section-problem">
+    <div class="container">
+        <h2>{{ t('problem_title') }}</h2>
+        <div class="problem-list">
+            <div class="problem-item">❌ {{ t('problem_1') }}</div>
+            <div class="problem-item">❌ {{ t('problem_2') }}</div>
+            <div class="problem-item">❌ {{ t('problem_3') }}</div>
+            <div class="problem-item">❌ {{ t('problem_4') }}</div>
+        </div>
+        <p class="problem-conclusion">
+            Se você respondeu <strong>SIM</strong> para qualquer uma dessas perguntas,
+            esse curso foi feito para você! 👇
+        </p>
+    </div>
+</section>
+
+<!-- ========================================
+     SECTION 3: SOLUÇÃO (Modules Overview)
+     CONVERSION: Show value, build desire
+     ======================================== -->
+<section class="section-solution">
+    <div class="container">
+        <h2>{{ t('solution_title') }}</h2>
+        <p class="solution-subtitle">{{ t('solution_subtitle') }}</p>
+
+        <div class="modules-grid">
+            <div class="module-card">
+                <div class="module-icon">📚</div>
+                <h3>{{ t('module_1_title') }}</h3>
+                <p>{{ t('module_1_desc') }}</p>
+            </div>
+            <div class="module-card">
+                <div class="module-icon">💅</div>
+                <h3>{{ t('module_2_title') }}</h3>
+                <p>{{ t('module_2_desc') }}</p>
+            </div>
+            <div class="module-card">
+                <div class="module-icon">🎨</div>
+                <h3>{{ t('module_3_title') }}</h3>
+                <p>{{ t('module_3_desc') }}</p>
+            </div>
+            <div class="module-card">
+                <div class="module-icon">💰</div>
+                <h3>{{ t('module_4_title') }}</h3>
+                <p>{{ t('module_4_desc') }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========================================
+     SECTION 4: PROVA SOCIAL (Testimonials)
+     PSYCHOLOGY: Social proof reduces risk perception
+     ======================================== -->
+<section class="section-testimonials">
+    <div class="container">
+        <h2>{{ t('social_proof_title') }}</h2>
+
+        <div class="testimonials-grid">
+            {% for testimonial in testimonials %}
+            <div class="testimonial-card">
+                <div class="testimonial-rating">
+                    {% for i in range(testimonial.rating) %}⭐{% endfor %}
+                </div>
+                <p class="testimonial-text">{{ testimonial.text }}</p>
+                <div class="testimonial-author">
+                    <strong>{{ testimonial.name }}</strong>
+                    {% if testimonial.verified %}
+                    <span class="verified-badge">✓ Verificado</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Stats (credibility boost) -->
+        <div class="social-stats">
+            <div class="stat-item">
+                <span class="stat-number">{{ stats.students }}+</span>
+                <span class="stat-label">Alunas Formadas</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ stats.rating }}</span>
+                <span class="stat-label">Avaliação Média</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ stats.satisfaction }}</span>
+                <span class="stat-label">Satisfação</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========================================
+     SECTION 5: TRANSFORMAÇÃO (Future Pacing)
+     PSYCHOLOGY: Let them visualize success
+     ======================================== -->
+<section class="section-transformation">
+    <div class="container">
+        <h2>{{ t('transformation_title') }}</h2>
+        <div class="transformation-list">
+            <div class="transformation-item">{{ t('transformation_1') }}</div>
+            <div class="transformation-item">{{ t('transformation_2') }}</div>
+            <div class="transformation-item">{{ t('transformation_3') }}</div>
+            <div class="transformation-item">{{ t('transformation_4') }}</div>
+            <div class="transformation-item">{{ t('transformation_5') }}</div>
+        </div>
+
+        <!-- CTA #2: Mid-page conversion opportunity -->
+        <a href="#preco" class="cta-button cta-secondary" id="cta-transformation">
+            Quero Essa Transformação →
+        </a>
+    </div>
+</section>
+
+<!-- ========================================
+     SECTION 6: COMO FUNCIONA (Process)
+     REDUCE FRICTION: Show how easy it is
+     ======================================== -->
+<section class="section-how-it-works">
+    <div class="container">
+        <h2>{{ t('how_it_works_title') }}</h2>
+
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>{{ t('step_1_title') }}</h3>
+                <p>{{ t('step_1_desc') }}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>{{ t('step_2_title') }}</h3>
+                <p>{{ t('step_2_desc') }}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>{{ t('step_3_title') }}</h3>
+                <p>{{ t('step_3_desc') }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========================================
+     SECTION 7: BÔNUS (Stack Value)
+     INCREASE PERCEIVED VALUE: More than they pay for
+     ======================================== -->
+<section class="section-bonus">
+    <div class="container">
+        <h2>{{ t('bonus_title') }}</h2>
+
+        <div class="bonus-grid">
+            <div class="bonus-card">
+                <h3>{{ t('bonus_1_title') }}</h3>
+                <p class="bonus-value">{{ t('bonus_1_value') }}</p>
+                <p>{{ t('bonus_1_desc') }}</p>
+            </div>
+            <div class="bonus-card">
+                <h3>{{ t('bonus_2_title') }}</h3>
+                <p class="bonus-value">{{ t('bonus_2_value') }}</p>
+                <p>{{ t('bonus_2_desc') }}</p>
+            </div>
+            <div class="bonus-card">
+                <h3>{{ t('bonus_3_title') }}</h3>
+                <p class="bonus-value">{{ t('bonus_3_value') }}</p>
+                <p>{{ t('bonus_3_desc') }}</p>
+            </div>
+        </div>
+
+        <p class="bonus-total">
+            <strong>Valor total dos bônus: R$ 211,00</strong><br>
+            Você recebe TUDO isso de graça! 🎁
+        </p>
+    </div>
+</section>
+
+<!-- ========================================
+     SECTION 8: GARANTIA (Risk Reversal)
+     REMOVE BUYER ANXIETY: Money-back guarantee
+     ======================================== -->
+<section class="section-guarantee">
+    <div class="container">
+        <div class="guarantee-badge">{{ t('guarantee_badge') }}</div>
+        <h2>{{ t('guarantee_title') }}</h2>
+        <p class="guarantee-text">{{ t('guarantee_text') }}</p>
+    </div>
+</section>
+
+<!-- ========================================
+     SECTION 9: URGÊNCIA (Scarcity + Timer)
+     CONVERSION BOOSTER: Create urgency
+     ======================================== -->
+<section class="section-urgency">
+    <div class="container">
+        <h2>{{ t('urgency_title') }}</h2>
+
+        <!-- Countdown Timer (JavaScript below) -->
+        <div class="countdown-timer">
+            <div class="timer-label">{{ t('urgency_timer_text') }}</div>
+            <div class="timer-display">
+                <div class="timer-unit">
+                    <span id="timer-minutes">--</span>
+                    <span class="timer-label-small">minutos</span>
+                </div>
+                <div class="timer-separator">:</div>
+                <div class="timer-unit">
+                    <span id="timer-seconds">--</span>
+                    <span class="timer-label-small">segundos</span>
+                </div>
+            </div>
+        </div>
+
+        <p class="urgency-spots">{{ t('urgency_spots_text') }}</p>
+    </div>
+</section>
+
+<!-- ========================================
+     SECTION 10: PREÇO + CTA FINAL (Conversion)
+     MAIN CONVERSION POINT: Clear pricing, strong CTA
+     ======================================== -->
+<section id="preco" class="section-price">
+    <div class="container">
+        <h2>{{ t('price_title') }}</h2>
+
+        <div class="price-box">
+            <p class="price-before">{{ t('price_before') }}</p>
+            <p class="price-old">{{ t('price_strikethrough') }}</p>
+
+            <p class="price-after">{{ t('price_after') }}</p>
+            <p class="price-new">{{ course.currency }} {{ course.price_promo }}</p>
+
+            <p class="price-installments">{{ t('price_installments') }}</p>
+
+            <!-- CTA #3: MAIN conversion button -->
+            <a href="{{ course.checkout_url }}"
+               class="cta-button cta-primary cta-large"
+               id="cta-checkout"
+               target="_blank"
+               rel="noopener">
+                {{ t('price_cta') }}
+            </a>
+
+            <!-- Trust signals below CTA -->
+            <div class="checkout-trust">
+                <span>🔒 Pagamento 100% Seguro</span>
+                <span>✅ Acesso Imediato</span>
+                <span>🛡️ Garantia de 7 Dias</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========================================
+     SECTION 11: FAQ (Objection Handling)
+     REDUCE FRICTION: Answer common questions
+     ======================================== -->
+<section class="section-faq">
+    <div class="container">
+        <h2>{{ t('faq_title') }}</h2>
+
+        <div class="faq-list">
+            {% for item in faq %}
+            <div class="faq-item">
+                <h3 class="faq-question">{{ item.q }}</h3>
+                <p class="faq-answer">{{ item.a }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Final CTA #4 -->
+        <a href="#preco" class="cta-button cta-secondary" id="cta-faq">
+            Ainda Tenho Dúvidas? Fale no WhatsApp →
+        </a>
+    </div>
+</section>
+
+<!-- ========================================
+     FOOTER (Legal + Contact)
+     LGPD COMPLIANCE: Disclaimers, privacy policy
+     ======================================== -->
+<footer class="footer-landing">
+    <div class="container">
+        <p class="footer-disclaimer">{{ t('footer_disclaimer') }}</p>
+
+        <div class="footer-links">
+            <a href="/privacy">{{ t('footer_privacy') }}</a>
+            <span>|</span>
+            <a href="https://wa.me/{{ course.whatsapp }}">{{ t('footer_contact') }}</a>
+        </div>
+
+        <p class="footer-copyright">
+            © {{ year }} {{ course.name }}. Todos os direitos reservados.
+        </p>
+    </div>
+</footer>
+
+<!-- ========================================
+     VANILLA JAVASCRIPT (No jQuery - Performance!)
+     FEATURES:
+     - Countdown timer (urgency)
+     - Smooth scroll to CTAs
+     - Analytics event tracking (TODO)
+     ======================================== -->
+<script>
+(function() {
+    'use strict';
+
+    // ===== COUNTDOWN TIMER =====
+    // Set timer duration (passed from backend)
+    const TIMER_DURATION_MINUTES = {{ timer_duration }};
+    const TIMER_DURATION_MS = TIMER_DURATION_MINUTES * 60 * 1000;
+
+    // Check if timer exists in localStorage (persist across reloads)
+    let timerEndTime = localStorage.getItem('timerEndTime');
+
+    if (!timerEndTime) {
+        // First visit: set timer
+        timerEndTime = Date.now() + TIMER_DURATION_MS;
+        localStorage.setItem('timerEndTime', timerEndTime);
+    } else {
+        timerEndTime = parseInt(timerEndTime, 10);
+    }
+
+    function updateTimer() {
+        const now = Date.now();
+        const remaining = Math.max(0, timerEndTime - now);
+
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+
+        const minutesEl = document.getElementById('timer-minutes');
+        const secondsEl = document.getElementById('timer-seconds');
+
+        if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+        if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+
+        if (remaining > 0) {
+            setTimeout(updateTimer, 1000);
+        } else {
+            // Timer expired - could show "Offer expired" message
+            if (minutesEl) minutesEl.textContent = '00';
+            if (secondsEl) secondsEl.textContent = '00';
+        }
+    }
+
+    // Start timer when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateTimer);
+    } else {
+        updateTimer();
+    }
+
+    // ===== SMOOTH SCROLL TO PRICE =====
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href === '#preco') {
+                e.preventDefault();
+                const target = document.getElementById('preco');
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+    });
+
+    // ===== ANALYTICS EVENT TRACKING (TODO: integrate with GA4/Mixpanel) =====
+    // Track CTA clicks for conversion optimization
+    const ctaButtons = document.querySelectorAll('[id^="cta-"]');
+    ctaButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const ctaId = this.id;
+            console.log('CTA clicked:', ctaId);
+            // TODO: Send to analytics
+            // gtag('event', 'cta_click', { 'cta_id': ctaId });
+        });
+    });
+
+    // ===== SCROLL DEPTH TRACKING (for heatmap analysis) =====
+    let maxScroll = 0;
+    window.addEventListener('scroll', function() {
+        const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+        if (scrollPercent > maxScroll) {
+            maxScroll = scrollPercent;
+            // TODO: Send to analytics at 25%, 50%, 75%, 100%
+            if (maxScroll % 25 === 0) {
+                console.log('Scroll depth:', maxScroll + '%');
+            }
+        }
+    });
+})();
+</script>
+
+</body>
+</html>

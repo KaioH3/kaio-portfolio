@@ -1,18 +1,25 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/home.css">
+{% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
 <section class="hero">
     <div class="container">
-        <h1 class="hero-title">Kaio H. Siqueira</h1>
-        <h2 class="hero-subtitle">Machine Learning Engineer</h2>
-        <p class="hero-description">
-            Especialista em ML/AI com foco em sistemas production-ready.
-            FastAPI, PyTorch, XGBoost, FastEmbed, RAG Systems.
-        </p>
+        <div class="lang-toggle-wrapper">
+            <div class="lang-toggle">
+                <a href="?lang=pt-BR" class="lang-toggle__btn {% if lang == 'pt-BR' %}lang-toggle__btn--active{% endif %}">PT</a>
+                <a href="?lang=en-US" class="lang-toggle__btn {% if lang == 'en-US' %}lang-toggle__btn--active{% endif %}">EN</a>
+            </div>
+        </div>
+        <h1 class="hero-title">{{ t('hero_title') }}</h1>
+        <h2 class="hero-subtitle">{{ t('hero_subtitle') }}</h2>
+        <p class="hero-description">{{ t('hero_description') }}</p>
         <div class="hero-cta">
-            <a href="#projects" class="btn btn--primary">Ver Projetos</a>
-            <a href="https://github.com/kaioH3" class="btn btn--secondary" target="_blank">GitHub</a>
+            <a href="#projects" class="btn btn--primary">{{ t('hero_cta_projects') }}</a>
+            <a href="https://github.com/kaioH3" class="btn btn--secondary" target="_blank">{{ t('hero_cta_github') }}</a>
         </div>
     </div>
 </section>
@@ -23,15 +30,15 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value">{{ stats.projects }}</div>
-                <div class="stat-label">Projetos</div>
+                <div class="stat-label">{{ t('stats_projects') }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{{ stats.technologies }}+</div>
-                <div class="stat-label">Tecnologias</div>
+                <div class="stat-label">{{ t('stats_technologies') }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{{ stats.experience }}</div>
-                <div class="stat-label">Experiência</div>
+                <div class="stat-label">{{ t('stats_experience') }}</div>
             </div>
         </div>
     </div>
@@ -40,38 +47,38 @@
 <!-- Skills Section -->
 <section id="skills" class="skills">
     <div class="container">
-        <h2 class="section-title">Tech Stack</h2>
-        
+        <h2 class="section-title">{{ t('section_title_skills') }}</h2>
+
         <div class="skills-grid">
             <div class="skill-category">
-                <h3>ML/AI</h3>
+                <h3>{{ t('skill_category_ml') }}</h3>
                 <div class="tech-tags">
                     {% for tech in skills.ml_frameworks %}
                     <span class="badge badge--primary">{{ tech }}</span>
                     {% endfor %}
                 </div>
             </div>
-            
+
             <div class="skill-category">
-                <h3>Backend</h3>
+                <h3>{{ t('skill_category_backend') }}</h3>
                 <div class="tech-tags">
                     {% for tech in skills.backend %}
                     <span class="badge badge--secondary">{{ tech }}</span>
                     {% endfor %}
                 </div>
             </div>
-            
+
             <div class="skill-category">
-                <h3>Frontend</h3>
+                <h3>{{ t('skill_category_frontend') }}</h3>
                 <div class="tech-tags">
                     {% for tech in skills.frontend %}
                     <span class="badge badge--success">{{ tech }}</span>
                     {% endfor %}
                 </div>
             </div>
-            
+
             <div class="skill-category">
-                <h3>DevOps</h3>
+                <h3>{{ t('skill_category_devops') }}</h3>
                 <div class="tech-tags">
                     {% for tech in skills.devops %}
                     <span class="badge badge--info">{{ tech }}</span>
@@ -85,8 +92,8 @@
 <!-- Projects Section -->
 <section id="projects" class="projects">
     <div class="container">
-        <h2 class="section-title">Projetos Destaque</h2>
-        
+        <h2 class="section-title">{{ t('section_title_projects') }}</h2>
+
         <div class="projects-grid">
             {% for project in projects %}
             <div class="card project-card">
@@ -96,7 +103,7 @@
                 </div>
                 <div class="card-body">
                     <p>{{ project.description }}</p>
-                    
+
                     <div class="project-tech">
                         {% for tech in project.tech %}
                         <span class="badge badge--small">{{ tech }}</span>
@@ -104,7 +111,7 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ project.url }}" class="btn btn--outline">Ver Projeto →</a>
+                    <a href="{{ project.url }}" class="btn btn--outline">{{ t('project_cta') }} →</a>
                 </div>
             </div>
             {% endfor %}

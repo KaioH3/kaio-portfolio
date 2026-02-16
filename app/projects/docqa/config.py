@@ -8,13 +8,15 @@ from typing import Literal
 
 
 class RAGConfig(BaseSettings):
-    # === Embedding: FastEmbed (CPU, no torch, ~220MB) ===
-    EMBEDDING_MODEL: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-    EMBEDDING_DIMENSION: int = 384
+    # === Embedding: Voyage AI (API-based, zero RAM!) ===
+    VOYAGE_API_KEY: str = os.getenv("VOYAGE_API_KEY", "")
+    VOYAGE_MODEL: str = "voyage-3-lite"
+    EMBEDDING_DIMENSION: int = 512  # voyage-3-lite dimension
     EMBEDDING_BATCH_SIZE: int = 32
 
-    # === Vector Store: Qdrant embedded ===
-    QDRANT_PATH: str = "./data/qdrant"
+    # === Vector Store: Qdrant Cloud ===
+    QDRANT_URL: str = os.getenv("QDRANT_URL", "")
+    QDRANT_API_KEY: str = os.getenv("QDRANT_API_KEY", "")
     QDRANT_COLLECTION: str = "documents"
 
     # === Document Processing ===

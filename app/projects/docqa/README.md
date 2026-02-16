@@ -2,14 +2,14 @@
 
 **Production-ready Retrieval-Augmented Generation with Chain-of-Verification**
 
-## 🎯 Purpose
+##  Purpose
 
 Demonstrate ML engineering maturity through intelligent production trade-offs:
 - **R$530/month → R$0/month** (zero operational cost until scale)
 - **5% performance penalty** (imperceptible to users)
 - **100% feature parity** with enterprise solutions
 
-## 🏗️ Architecture Decisions
+##  Architecture Decisions
 
 ### Decision 1: Local Embeddings (R$80/mo → R$0)
 
@@ -83,7 +83,7 @@ Demonstrate ML engineering maturity through intelligent production trade-offs:
 
 **Decision:** CoVe always-on. Quality > speed for this use case.
 
-## 📊 Performance Metrics
+##  Performance Metrics
 
 Throughput: 43,000 queries/day (free tier limit)
 Latency (p50): 280ms end-to-end
@@ -94,7 +94,7 @@ Cost: R$0/month (vs enterprise stack: R$530/mo)
 
 text
 
-## 🔧 Tech Stack
+##  Tech Stack
 
 | Component | Choice | Alternative | Savings |
 |-----------|--------|-------------|---------|
@@ -104,7 +104,7 @@ text
 | Frontend | HTMX (14KB) | React (150KB) | Dev time |
 | **Total** | **R$0/month** | **R$530/month** | **R$530/mo** |
 
-## 🚀 When to Upgrade
+##  When to Upgrade
 
 **Triggers for switching to paid services:**
 
@@ -128,7 +128,7 @@ text
    - Cost: +Dev time
    - Benefit: Better UX for complex interactions
 
-## 🎓 Engineering Principles Demonstrated
+##  Engineering Principles Demonstrated
 
 1. **Cost-conscious scaling** - Start free, upgrade only when proven
 2. **Measured trade-offs** - Every decision backed by data
@@ -136,7 +136,7 @@ text
 4. **Production observability** - Health checks, metrics, logging
 5. **Business-aware tech** - Optimize for MVP → scale path
 
-## 📝 Interview Talking Points
+##  Interview Talking Points
 
 **"Why local embeddings?"**
 > "For 95% of queries, the 384-dim MiniLM model is indistinguishable from OpenAI's 1536-dim model. I save R$80/month and get 5x faster inference. If accuracy becomes a bottleneck, I can swap to OpenAI in 10 lines of code. That's engineering."
@@ -150,8 +150,8 @@ text
 **"What's your scaling plan?"**
 > "I profiled every component. Embeddings can handle 10k docs/day on 2 CPU cores. Qdrant embedded scales to 10M vectors before needing clustering. Groq rate limits hit at 43k req/day. My bottleneck is clear: LLM rate limits. Solution is also clear: upgrade to paid tier (R$150/mo) or self-host Ollama (R$50/mo VPS). I know my numbers."
 
-## 📧 Contact
+##  Contact
 
-Built with ❤️ by Kaio H. Siqueira  
+Built with  by Kaio H. Siqueira  
 Backend Engineer → ML/AI | 12 years experience  
 [GitHub](https://github.com/KaioH3) | [LinkedIn](https://linkedin.com/in/kaiohsiqueira)

@@ -9,6 +9,7 @@ jinja2>=3.1.4
 # === Configuration ===
 pydantic>=2.9.2
 pydantic-settings>=2.5.2
+pydantic[email]>=2.9.2
 python-dotenv>=1.0.1
 
 # === Monitoring ===
@@ -24,9 +25,16 @@ httpx>=0.27.2
 tenacity>=8.2.3
 openai>=1.12.0
 
-# === RAG - LIGHTWEIGHT (no torch!) ===
-fastembed>=0.4.0
+# === RAG - API-based (zero local ML dependencies!) ===
+voyageai>=0.2.0
 qdrant-client>=1.7.3
 pypdf>=4.0.0
 rank-bm25>=0.2.2
 numpy>=1.26.3
+
+# === Credit Risk ML ===
+xgboost>=2.0.0
+scikit-learn>=1.4.0
+pandas>=2.2.0
+shap>=0.44.0
+joblib>=1.3.0

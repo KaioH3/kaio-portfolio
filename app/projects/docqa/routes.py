@@ -1,4 +1,4 @@
-"""RAG System API Routes - WITH i18n + HTMX Support"""
+"""Doc QA API Routes - Document Question & Answering System with i18n + HTMX Support"""
 from fastapi import APIRouter, UploadFile, File, Request, HTTPException, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -23,7 +23,7 @@ from .i18n import t, get_language_from_request
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/rag-system", tags=["RAG System"])
+router = APIRouter(prefix="/docqa", tags=["Doc QA"])
 
 templates = Jinja2Templates(
     directory=[
@@ -36,11 +36,11 @@ templates.env.globals["t"] = t
 
 
 @router.get("/", response_class=HTMLResponse)
-async def rag_index(request: Request):
-    """Main RAG interface with i18n"""
+async def docqa_index(request: Request):
+    """Main Doc QA interface with i18n"""
     lang = get_language_from_request(request)
     return templates.TemplateResponse(
-        "rag_index.html", 
+        "docqa_index.html",
         {"request": request, "lang": lang}
     )
 

@@ -7,8 +7,12 @@ import httpx
 import logging
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from fastapi import HTTPException
+
 from ..config import rag_config
 from ..models import RetrievedChunk
+from app.middleware.rate_limit import get_global_rate_limiter
+from app.middleware.quota_tracker import get_quota_tracker
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +27,14 @@ class GenerationService:
         self, query: str, context_chunks: List[RetrievedChunk],
         max_tokens: Optional[int] = None,
     ) -> Dict[str, Any]:
+        # Rate limit check BEFORE calling LLM
+        limiter = get_global_rate_limiter()
+        if not limiter.check_and_increment("groq_queries"):
+            raise HTTPException(
+                status_code=429,
+                detail="LLM rate limit exceeded. Try again in 1 hour."
+            )
+
         prompt = self._build_prompt(query, context_chunks)
         providers = self._get_provider_chain()
 
@@ -31,6 +43,8 @@ class GenerationService:
             try:
                 logger.info(f"Trying provider: {provider_name}")
                 return await provider_fn(prompt, max_tokens)
+            except HTTPException:
+                raise
             except Exception as e:
                 logger.warning(f"{provider_name} failed: {e}")
                 last_error = e
@@ -82,6 +96,12 @@ Answer:"""
             resp = await client.post(url, json=payload, headers=headers)
             resp.raise_for_status()
             r = resp.json()
+
+            # Track tokens (Groq retorna usage no response)
+            if "usage" in r:
+                tracker = get_quota_tracker()
+                tracker.record_groq_tokens(r["usage"]["total_tokens"])
+
             return {
                 "answer": r["choices"][0]["message"]["content"],
                 "tokens_used": {

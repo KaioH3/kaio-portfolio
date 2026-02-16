@@ -22,6 +22,15 @@ pytest tests/test_rag_system.py -v
 # Run tests with coverage for RAG module
 pytest tests/test_rag_system.py --cov=app/projects/ragsystem
 
+# Setup Credit Risk project (download dataset + train model)
+./scripts/setup_creditrisk.sh
+
+# Train Credit Risk model manually
+python -m app.projects.creditrisk.services.model_training
+
+# Run Credit Risk tests
+pytest tests/test_creditrisk.py -v
+
 # Build container
 podman build -t kaio-portfolio-api:latest -f containerfiles/Containerfile.api .
 
@@ -39,8 +48,9 @@ podman-compose -f deploy/podman-compose.yml up -d
 - `app/routers/home.py` — Landing page (`/`)
 - `app/routers/health.py` — Health probes (`/api/health`, `/api/ready`)
 - `app/projects/ragsystem/routes.py` — RAG system (`/rag-system/`)
+- `app/projects/creditrisk/routes.py` — Credit Risk Scoring (`/credit-risk/`)
 
-**Projects structure**: Each project lives under `app/projects/<name>/` with its own config, models, routes, services, and templates. Currently: `ragsystem` (active) and `creditrisk` (placeholder).
+**Projects structure**: Each project lives under `app/projects/<name>/` with its own config, models, routes, services, and templates. Currently: `ragsystem` (active) and `creditrisk` (active).
 
 **RAG service layer** (`app/projects/ragsystem/services/`):
 - `embeddings.py` — FastEmbed wrapper (CPU-only, paraphrase-multilingual-MiniLM-L12-v2)
@@ -54,7 +64,15 @@ podman-compose -f deploy/podman-compose.yml up -d
 
 Services use a singleton pattern with `get_*_service()` factory functions. Document processor uses SHA-256 content hashing for deduplication.
 
-**i18n**: `app/projects/ragsystem/i18n.py` provides PT-BR and EN-US translations. Detection order: query param `?lang=` -> cookie -> Accept-Language header -> default `en-US`.
+**Credit Risk service layer** (`app/projects/creditrisk/services/`):
+- `data_loader.py` — Loads and merges Kaggle CSV datasets (97k+ applications)
+- `feature_engineering.py` — Feature pipeline (ratios, encoding, scaling) with singleton pattern
+- `model_training.py` — XGBoost training with hyperparameter tuning
+- `risk_scoring.py` — Prediction + SHAP explanations (singleton, lazy loading)
+
+Credit Risk uses same patterns as RAG: Pydantic config, singleton services, i18n support, HTMX + JSON endpoints. Model artifacts saved in `data/models/`. Requires manual dataset download from Kaggle (see `app/projects/creditrisk/README.md`).
+
+**i18n**: Both projects provide PT-BR and EN-US translations via `i18n.py`. Detection order: query param `?lang=` -> cookie -> Accept-Language header -> default `en-US`.
 
 **Templates**: Jinja2 templates in `templates/` (global) and `app/projects/ragsystem/templates/` (RAG-specific). Base layout at `templates/base.html`.
 

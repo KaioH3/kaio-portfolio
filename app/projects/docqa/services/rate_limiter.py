@@ -12,7 +12,8 @@ from ..config import rag_config
 
 logger = logging.getLogger(__name__)
 
-DATA_FILE = Path(rag_config.QDRANT_PATH).parent / "rate_limits.json"
+# Store rate limit data in ./data directory
+DATA_FILE = Path("./data/rate_limits.json")
 
 
 class RateLimiter:

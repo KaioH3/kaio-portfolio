@@ -1,18 +1,22 @@
 """
-Vector Store Service - Qdrant embedded mode
+Vector Store Service - Qdrant Cloud
 """
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance, VectorParams, PointStruct,
     Filter, FieldCondition, MatchValue, SearchParams,
+    PayloadSchemaType, TextIndexParams,
 )
 from typing import List, Dict, Any, Optional
-from pathlib import Path
 import logging
 import uuid
 
+from fastapi import HTTPException
+
 from ..config import rag_config
 from ..models import DocumentMetadata, RetrievedChunk
+from app.middleware.rate_limit import get_global_rate_limiter
+from app.middleware.quota_tracker import get_quota_tracker
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +32,16 @@ class VectorStore:
     @property
     def client(self) -> QdrantClient:
         if self._client is None:
-            Path(rag_config.QDRANT_PATH).mkdir(parents=True, exist_ok=True)
-            logger.info(f"Initializing Qdrant at {rag_config.QDRANT_PATH}")
-            self._client = QdrantClient(path=rag_config.QDRANT_PATH)
+            if not rag_config.QDRANT_URL or not rag_config.QDRANT_API_KEY:
+                raise ValueError("QDRANT_URL and QDRANT_API_KEY must be configured")
+
+            logger.info(f"Connecting to Qdrant Cloud: {rag_config.QDRANT_URL}")
+            self._client = QdrantClient(
+                url=rag_config.QDRANT_URL,
+                api_key=rag_config.QDRANT_API_KEY,
+            )
             self._ensure_collection()
+            logger.info("Qdrant Cloud client initialized successfully")
         return self._client
 
     def _ensure_collection(self):
@@ -42,6 +52,14 @@ class VectorStore:
             self._client.create_collection(
                 collection_name=self.collection_name,
                 vectors_config=VectorParams(size=self.dimension, distance=Distance.COSINE),
+            )
+
+            # Create payload index for document_id (required for filtering)
+            logger.info("Creating payload index for document_id")
+            self._client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="document_id",
+                field_schema=PayloadSchemaType.KEYWORD,
             )
 
     def document_exists(self, document_id: str) -> bool:
@@ -63,6 +81,14 @@ class VectorStore:
         if not (len(texts) == len(embeddings) == len(metadatas)):
             raise ValueError("texts, embeddings, and metadatas must have same length")
 
+        # Rate limit check BEFORE writing to Qdrant
+        limiter = get_global_rate_limiter()
+        if not limiter.check_and_increment("qdrant_writes"):
+            raise HTTPException(
+                status_code=429,
+                detail="Qdrant write rate limit exceeded. Try again in 1 hour."
+            )
+
         points = []
         point_ids = []
         for text, embedding, metadata in zip(texts, embeddings, metadatas):
@@ -83,6 +109,11 @@ class VectorStore:
             ))
         self.client.upsert(collection_name=self.collection_name, points=points)
         logger.info(f"Added {len(points)} points to vector store")
+
+        # Track usage
+        tracker = get_quota_tracker()
+        tracker.record_qdrant_documents(len(texts))
+
         return point_ids
 
     def search(

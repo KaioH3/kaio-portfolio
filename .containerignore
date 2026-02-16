@@ -1,0 +1,55 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Documentation
+*.md
+docs/
+MIGRATION.md
+
+# Tests
+tests/
+.pytest_cache/
+
+# Development
+.env.example
+*.log
+.DS_Store
+
+# Claude/AI
+.claude/
+
+# Node (if any)
+node_modules/
+npm-debug.log
+
+# Data (might contain large files - exclude if not needed in container)
+data/qdrant/
+*.jsonl
+
+# Temporary files
+tmp/
+temp/
+*.tmp

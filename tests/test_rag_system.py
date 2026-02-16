@@ -61,6 +61,6 @@ class TestFrontend:
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_tests():
-    print("\n🔍 Chain of Verification - Test Suite")
+    print("\n Chain of Verification - Test Suite")
     yield
-    print("\n✅ Tests completed!")
+    print("\n Tests completed!")

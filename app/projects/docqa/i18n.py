@@ -1,16 +1,16 @@
 """
-Internationalization (i18n) Module for RAG System
+Internationalization (i18n) Module for DocQA System
 Supports: PT-BR (Brazilian Portuguese) + EN-US (English)
 
 Usage:
     from .i18n import t, get_language_from_request
-    
+
     # Basic translation
     text = t("upload_title", lang="pt-BR")
-    
+
     # With parameters
     message = t("upload_success", lang="en-US", filename="doc.pdf", chunks=10)
-    
+
     # Auto-detect from request
     lang = get_language_from_request(request)
 """
@@ -27,18 +27,18 @@ DEFAULT_LANGUAGE: Language = "en-US"
 TRANSLATIONS: Dict[str, Dict[Language, str]] = {
     # === PAGE TITLES ===
     "page_title": {
-        "pt-BR": "🧠 RAG Document Intelligence",
-        "en-US": "🧠 RAG Document Intelligence"
+        "pt-BR": "Doc QA - Perguntas sobre Documentos",
+        "en-US": "Doc QA - Document Question & Answering"
     },
     "page_subtitle": {
-        "pt-BR": "Sistema de Recuperação e Geração Aumentada com Chain-of-Verification",
-        "en-US": "Retrieval-Augmented Generation with Chain-of-Verification"
+        "pt-BR": "Sistema inteligente de perguntas e respostas sobre documentos com verificação de fatos em tempo real",
+        "en-US": "Intelligent document question-answering system with real-time fact verification"
     },
-    
+
     # === UPLOAD SECTION ===
     "upload_section_title": {
-        "pt-BR": "📤 Enviar Documento",
-        "en-US": "📤 Upload Document"
+        "pt-BR": "Enviar Documento",
+        "en-US": "Upload Document"
     },
     "upload_file_label": {
         "pt-BR": "Selecione um arquivo (PDF, TXT, MD):",
@@ -49,46 +49,46 @@ TRANSLATIONS: Dict[str, Dict[Language, str]] = {
         "en-US": "Upload"
     },
     "upload_indicator": {
-        "pt-BR": "⏳ Enviando...",
-        "en-US": "⏳ Uploading..."
+        "pt-BR": "Processando...",
+        "en-US": "Processing..."
     },
     "upload_success": {
-        "pt-BR": "✅ <strong>{filename}</strong> indexado com sucesso!<br>📄 {chunks} chunks criados<br>⏱️ {time_ms:.0f}ms",
-        "en-US": "✅ <strong>{filename}</strong> indexed successfully!<br>📄 {chunks} chunks created<br>⏱️ {time_ms:.0f}ms"
+        "pt-BR": "<strong>{filename}</strong> indexado com sucesso!<br>{chunks} fragmentos criados<br>{time_ms:.0f}ms",
+        "en-US": "<strong>{filename}</strong> indexed successfully!<br>{chunks} chunks created<br>{time_ms:.0f}ms"
     },
     "upload_error": {
-        "pt-BR": "❌ Erro ao processar documento: {error}",
-        "en-US": "❌ Error processing document: {error}"
+        "pt-BR": "Erro ao processar documento: {error}",
+        "en-US": "Error processing document: {error}"
     },
     "upload_error_size": {
-        "pt-BR": "❌ Arquivo muito grande (máx {max_mb}MB)",
-        "en-US": "❌ File too large (max {max_mb}MB)"
+        "pt-BR": "Arquivo muito grande (máximo {max_mb}MB)",
+        "en-US": "File too large (max {max_mb}MB)"
     },
     "upload_error_type": {
-        "pt-BR": "❌ Tipo de arquivo não suportado: {ext}",
-        "en-US": "❌ Unsupported file type: {ext}"
+        "pt-BR": "Tipo de arquivo não suportado: {ext}",
+        "en-US": "Unsupported file type: {ext}"
     },
-    
+
     # === QUERY SECTION ===
     "query_section_title": {
-        "pt-BR": "💬 Fazer Pergunta",
-        "en-US": "💬 Ask Question"
+        "pt-BR": "Consultar Documentos",
+        "en-US": "Query Documents"
     },
     "query_input_placeholder": {
-        "pt-BR": "O que você gostaria de saber?",
-        "en-US": "What would you like to know?"
+        "pt-BR": "Faça sua pergunta sobre os documentos...",
+        "en-US": "Ask a question about your documents..."
     },
     "query_verification_label": {
-        "pt-BR": "Ativar Chain-of-Verification (reduz alucinações)",
+        "pt-BR": "Ativar Cadeia de Verificação (reduz alucinações)",
         "en-US": "Enable Chain-of-Verification (reduces hallucinations)"
     },
     "query_button": {
-        "pt-BR": "Perguntar",
-        "en-US": "Ask"
+        "pt-BR": "Consultar",
+        "en-US": "Query"
     },
     "query_indicator": {
-        "pt-BR": "🤔 Pensando...",
-        "en-US": "🤔 Thinking..."
+        "pt-BR": "Processando...",
+        "en-US": "Processing..."
     },
     "query_answer_title": {
         "pt-BR": "Resposta:",
@@ -103,58 +103,58 @@ TRANSLATIONS: Dict[str, Dict[Language, str]] = {
         "en-US": "Confidence: {confidence:.0%} | Time: {time_ms:.0f}ms | Model: {model}"
     },
     "query_no_documents": {
-        "pt-BR": "Nenhum documento relevante encontrado. Por favor, envie documentos primeiro.",
-        "en-US": "No relevant documents found. Please upload documents first."
+        "pt-BR": "Nenhum documento encontrado. Por favor, envie documentos antes de consultar.",
+        "en-US": "No documents found. Please upload documents before querying."
     },
     "query_error": {
-        "pt-BR": "❌ Erro ao processar pergunta: {error}",
-        "en-US": "❌ Error processing query: {error}"
+        "pt-BR": "Erro ao processar consulta: {error}",
+        "en-US": "Error processing query: {error}"
     },
     "query_rate_limited": {
-        "pt-BR": "⚠️ Limite mensal atingido ({limit} consultas/mês). Resets no próximo mês.",
-        "en-US": "⚠️ Monthly limit reached ({limit} queries/month). Resets next month."
+        "pt-BR": "Limite mensal atingido ({limit} consultas/mês). Reinicia no próximo mês.",
+        "en-US": "Monthly limit reached ({limit} queries/month). Resets next month."
     },
     "query_remaining": {
-        "pt-BR": "Consultas restantes este mês: {remaining}/{limit}",
+        "pt-BR": "Consultas restantes neste mês: {remaining}/{limit}",
         "en-US": "Queries remaining this month: {remaining}/{limit}"
     },
-    
+
     # === VERIFICATION STEPS ===
     "verification_title": {
-        "pt-BR": "🔍 Etapas de Verificação:",
-        "en-US": "🔍 Verification Steps:"
+        "pt-BR": "Etapas de Verificação:",
+        "en-US": "Verification Steps:"
     },
     "verification_step": {
         "pt-BR": "{step}: {status} (confiança: {confidence:.0%})",
         "en-US": "{step}: {status} (confidence: {confidence:.0%})"
     },
     "verification_passed": {
-        "pt-BR": "✅ Passou",
-        "en-US": "✅ Passed"
+        "pt-BR": "Aprovado",
+        "en-US": "Passed"
     },
     "verification_failed": {
-        "pt-BR": "❌ Falhou",
-        "en-US": "❌ Failed"
+        "pt-BR": "Reprovado",
+        "en-US": "Failed"
     },
-    
+
     # === LANGUAGE SELECTOR ===
     "language_pt_br": {
-        "pt-BR": "🇧🇷 Português",
-        "en-US": "🇧🇷 Portuguese"
+        "pt-BR": "Português",
+        "en-US": "Portuguese"
     },
     "language_en_us": {
-        "pt-BR": "🇺🇸 English",
-        "en-US": "🇺🇸 English"
+        "pt-BR": "Inglês",
+        "en-US": "English"
     },
-    
+
     # === FOOTER ===
     "footer_tech_stack": {
-        "pt-BR": "Construído com FastAPI + FastEmbed + Qdrant + Groq",
-        "en-US": "Built with FastAPI + FastEmbed + Qdrant + Groq"
+        "pt-BR": "Desenvolvido com FastAPI + Voyage AI + Qdrant Cloud + Groq",
+        "en-US": "Built with FastAPI + Voyage AI + Qdrant Cloud + Groq"
     },
     "footer_performance": {
-        "pt-BR": "~200MB RAM | <2s latência | $0/mês",
-        "en-US": "~200MB RAM | <2s latency | $0/month"
+        "pt-BR": "~150MB RAM | <2s latência | $0/mês (free tiers)",
+        "en-US": "~150MB RAM | <2s latency | $0/month (free tiers)"
     },
 }
 
@@ -234,28 +234,28 @@ def verify_translations() -> Dict[str, Any]:
     return report
 
 if __name__ == "__main__":
-    print("🔍 Chain of Verification - i18n Module")
+    print("Chain of Verification - i18n Module")
     print("=" * 60)
-    
-    print("\n✅ Test 1: Basic translation")
+
+    print("\nTest 1: Basic translation")
     print(f"PT-BR: {t('upload_section_title', 'pt-BR')}")
     print(f"EN-US: {t('upload_section_title', 'en-US')}")
-    
-    print("\n✅ Test 2: Parameter substitution")
+
+    print("\nTest 2: Parameter substitution")
     msg = t("upload_success", "pt-BR", filename="test.pdf", chunks=10, time_ms=1234.5)
     print(f"PT-BR: {msg}")
-    
-    print("\n✅ Test 3: Translation integrity")
+
+    print("\nTest 3: Translation integrity")
     report = verify_translations()
     print(f"Total keys: {report['total_keys']}")
     print(f"Missing PT-BR: {len(report['missing_pt_br'])}")
     print(f"Missing EN-US: {len(report['missing_en_us'])}")
     print(f"Placeholder mismatches: {len(report['placeholder_mismatches'])}")
-    
+
     if report["placeholder_mismatches"]:
-        print("\n⚠️  Placeholder mismatches found:")
+        print("\nPlaceholder mismatches found:")
         for mismatch in report["placeholder_mismatches"]:
             print(f"  - {mismatch['key']}")
-    
+
     print("\n" + "=" * 60)
-    print("✅ i18n module verified successfully!")
+    print("i18n module verified successfully!")
