@@ -236,7 +236,7 @@ Self-taught engineer, programming since age 14 · Linux-native since 16 · Produ
 [![GitHub](https://img.shields.io/badge/GitHub-KaioH3-181717?logo=github)](https://github.com/KaioH3)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-kaiohsiqueira-0A66C2?logo=linkedin)](https://www.linkedin.com/in/kaiohsiqueira/)
 [![Medium](https://img.shields.io/badge/Medium-@KaioH3-00ab6c?logo=medium)](https://medium.com/@KaioH3)
-[![Email](https://img.shields.io/badge/Email-contato@kaio.ia.br-D14836?logo=gmail)](mailto:contato@kaio.ia.br)
+[![Email](https://img.shields.io/badge/Email-kaiohsiqueira@outlook.com-D14836?logo=gmail)](mailto:kaiohsiqueira@outlook.com)
 
 ---
 
@@ -282,6 +282,6 @@ uvicorn app.main:app --reload
 
 **Kaio H. Siqueira** — Engenheiro autodidata, programando desde os 14 anos · Linux desde os 16 · Deploys em produção desde 2023
 
-[GitHub](https://github.com/KaioH3) · [LinkedIn](https://www.linkedin.com/in/kaiohsiqueira/) · [contato@kaio.ia.br](mailto:contato@kaio.ia.br)
+[GitHub](https://github.com/KaioH3) · [LinkedIn](https://www.linkedin.com/in/kaiohsiqueira/) · [kaiohsiqueira@outlook.com](mailto:kaiohsiqueira@outlook.com)
 
 </details>

@@ -238,7 +238,7 @@ python -m cProfile -o profile.stats app/main.py
 ## Dúvidas?
 
 - Abra uma [Discussion](https://github.com/KaioH3/kaio-portfolio/discussions)
-- Entre em contato: contato@kaio.ia.br
+- Entre em contato: kaiohsiqueira@outlook.com
 
 ---
 
