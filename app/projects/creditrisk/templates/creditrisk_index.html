@@ -4,33 +4,34 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="/static/creditrisk.css">
-<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 {% endblock %}
 
 {% block content %}
-<!-- Hero -->
-<section class="credit-hero">
+<!-- Hero Section -->
+<section class="hero">
     <div class="container">
-        <div class="credit-hero__header">
-            <div>
-                <h1 class="credit-hero__title">{{ t('page_title', lang) }}</h1>
-                <p class="credit-hero__subtitle">{{ t('page_subtitle', lang) }}</p>
-            </div>
+        <!-- Language Toggle -->
+        <div class="lang-toggle-wrapper">
             <div class="lang-toggle">
                 <a href="?lang=pt-BR" class="lang-toggle__btn {% if lang == 'pt-BR' %}lang-toggle__btn--active{% endif %}">PT</a>
                 <a href="?lang=en-US" class="lang-toggle__btn {% if lang == 'en-US' %}lang-toggle__btn--active{% endif %}">EN</a>
             </div>
         </div>
+
+        <h1 class="hero-title">{{ t('page_title', lang) }}</h1>
+        <p class="hero-description">{{ t('page_subtitle', lang) }}</p>
     </div>
 </section>
 
 <!-- Main Content -->
-<section class="container credit-content">
-    <div class="credit-grid">
+<section class="container" style="margin-top: var(--space-12);">
+    <div class="form-result-grid">
         <!-- Form Column -->
         <div class="card">
             <div class="card-body">
-                <h2 class="section-title">{{ t('form_title', lang) }}</h2>
+                <h2 style="font-size: var(--font-size-2xl); margin-bottom: var(--space-6); text-align: center;">
+                    {{ t('form_title', lang) }}
+                </h2>
 
                 <form hx-post="/credit-risk/score?lang={{ lang }}"
                       hx-target="#result"
@@ -39,58 +40,58 @@
                       class="credit-form">
 
                     <!-- Demographic Section -->
-                    <fieldset class="form-section">
+                    <fieldset>
                         <legend>{{ t('form_demographic_section', lang) }}</legend>
 
-                        <div class="form-row">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
                             <div class="form-group">
-                                <label class="form-label">{{ t('field_gender', lang) }}</label>
-                                <select name="gender" required class="form-input">
+                                <label for="gender" class="form-label">{{ t('field_gender', lang) }}</label>
+                                <select id="gender" name="gender" required class="form-input">
                                     <option value="M">M</option>
                                     <option value="F">F</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">{{ t('field_age', lang) }}</label>
-                                <input type="number" name="age_years" min="18" max="100" value="30" required class="form-input">
+                                <label for="age_years" class="form-label">{{ t('field_age', lang) }}</label>
+                                <input type="number" id="age_years" name="age_years" min="18" max="100" value="30" required class="form-input">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">{{ t('field_family_status', lang) }}</label>
-                            <select name="family_status" required class="form-input">
+                            <label for="family_status" class="form-label">{{ t('field_family_status', lang) }}</label>
+                            <select id="family_status" name="family_status" required class="form-input">
                                 {% for status in family_statuses %}
                                 <option value="{{ status }}">{{ status }}</option>
                                 {% endfor %}
                             </select>
                         </div>
 
-                        <div class="form-row">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
                             <div class="form-group">
-                                <label class="form-label">{{ t('field_family_members', lang) }}</label>
-                                <input type="number" name="family_members" min="1" max="20" value="2" required class="form-input">
+                                <label for="family_members" class="form-label">{{ t('field_family_members', lang) }}</label>
+                                <input type="number" id="family_members" name="family_members" min="1" max="20" value="2" required class="form-input">
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">{{ t('field_children', lang) }}</label>
-                                <input type="number" name="children_count" min="0" max="10" value="0" class="form-input">
+                                <label for="children_count" class="form-label">{{ t('field_children', lang) }}</label>
+                                <input type="number" id="children_count" name="children_count" min="0" max="10" value="0" class="form-input">
                             </div>
                         </div>
                     </fieldset>
 
                     <!-- Financial Section -->
-                    <fieldset class="form-section">
+                    <fieldset>
                         <legend>{{ t('form_financial_section', lang) }}</legend>
 
                         <div class="form-group">
-                            <label class="form-label">{{ t('field_annual_income', lang) }}</label>
-                            <input type="number" name="annual_income" min="0" step="1000" value="50000" required class="form-input">
+                            <label for="annual_income" class="form-label">{{ t('field_annual_income', lang) }}</label>
+                            <input type="number" id="annual_income" name="annual_income" min="0" step="1000" value="50000" required class="form-input">
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">{{ t('field_income_type', lang) }}</label>
-                            <select name="income_type" required class="form-input">
+                            <label for="income_type" class="form-label">{{ t('field_income_type', lang) }}</label>
+                            <select id="income_type" name="income_type" required class="form-input">
                                 {% for type in income_types %}
                                 <option value="{{ type }}">{{ type }}</option>
                                 {% endfor %}
@@ -99,28 +100,32 @@
                     </fieldset>
 
                     <!-- Employment Section -->
-                    <fieldset class="form-section">
+                    <fieldset>
                         <legend>{{ t('form_employment_section', lang) }}</legend>
 
                         <div class="form-group">
-                            <label class="form-label">{{ t('field_employment_days', lang) }}</label>
-                            <input type="number" name="employment_days" max="0" value="-1095" required class="form-input">
-                            <small class="form-help">Formato: negativo (ex: -1095 = 3 anos)</small>
+                            <label for="employment_days" class="form-label">{{ t('field_employment_days', lang) }}</label>
+                            <input type="number" id="employment_days" name="employment_days" max="0" value="-1095" required class="form-input">
+                            <small class="form-help">{{ t('employment_days_help', lang) }}</small>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">{{ t('field_occupation', lang) }}</label>
-                            <input type="text" name="occupation_type" value="Managers" class="form-input">
+                            <label for="occupation_type" class="form-label">{{ t('field_occupation', lang) }}</label>
+                            <select id="occupation_type" name="occupation_type" required class="form-input">
+                                {% for type in occupation_types %}
+                                <option value="{{ type }}" {% if type == "Managers" %}selected{% endif %}>{{ type }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </fieldset>
 
                     <!-- Additional Section -->
-                    <fieldset class="form-section">
+                    <fieldset>
                         <legend>{{ t('form_additional_section', lang) }}</legend>
 
                         <div class="form-group">
-                            <label class="form-label">{{ t('field_education', lang) }}</label>
-                            <select name="education_level" required class="form-input">
+                            <label for="education_level" class="form-label">{{ t('field_education', lang) }}</label>
+                            <select id="education_level" name="education_level" required class="form-input">
                                 {% for level in education_levels %}
                                 <option value="{{ level }}">{{ level }}</option>
                                 {% endfor %}
@@ -128,8 +133,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">{{ t('field_housing', lang) }}</label>
-                            <select name="housing_type" required class="form-input">
+                            <label for="housing_type" class="form-label">{{ t('field_housing', lang) }}</label>
+                            <select id="housing_type" name="housing_type" required class="form-input">
                                 {% for type in housing_types %}
                                 <option value="{{ type }}">{{ type }}</option>
                                 {% endfor %}
@@ -138,26 +143,26 @@
 
                         <!-- Checkboxes -->
                         <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="has_car" value="true">
-                                {{ t('field_has_car', lang) }}
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="has_property" value="true">
-                                {{ t('field_has_property', lang) }}
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="has_phone" value="true">
-                                {{ t('field_has_phone', lang) }}
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="has_work_phone" value="true">
-                                {{ t('field_has_work_phone', lang) }}
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="has_email" value="true">
-                                {{ t('field_has_email', lang) }}
-                            </label>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="has_car" name="has_car" value="true">
+                                <label for="has_car">{{ t('field_has_car', lang) }}</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="has_property" name="has_property" value="true">
+                                <label for="has_property">{{ t('field_has_property', lang) }}</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="has_phone" name="has_phone" value="true">
+                                <label for="has_phone">{{ t('field_has_phone', lang) }}</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="has_work_phone" name="has_work_phone" value="true">
+                                <label for="has_work_phone">{{ t('field_has_work_phone', lang) }}</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="has_email" name="has_email" value="true">
+                                <label for="has_email">{{ t('field_has_email', lang) }}</label>
+                            </div>
                         </div>
                     </fieldset>
 
@@ -165,7 +170,7 @@
                     <div class="form-actions">
                         <button type="submit" class="btn btn--primary">{{ t('analyze_button', lang) }}</button>
                         <button type="reset" class="btn btn--secondary">{{ t('clear_button', lang) }}</button>
-                        <span id="loading" class="indicator">{{ t('analyzing_indicator', lang) }}</span>
+                        <span id="loading" class="indicator htmx-indicator">{{ t('analyzing_indicator', lang) }}</span>
                     </div>
                 </form>
             </div>
@@ -175,17 +180,31 @@
         <div class="card">
             <div class="card-body">
                 <div id="result" class="result-placeholder">
-                    <h3>{{ t('results_title', lang) }}</h3>
-                    <p>{{ t('info_description', lang if lang else 'en-US') }}</p>
+                    <h3 style="font-size: var(--font-size-xl); margin-bottom: var(--space-4); text-align: center;">
+                        {{ t('results_title', lang) }}
+                    </h3>
+                    <p style="text-align: center; color: var(--text-secondary); margin-bottom: var(--space-6);">
+                        {{ t('info_description', lang if lang else 'en-US') }}
+                    </p>
 
                     <!-- Info Section -->
-                    <div class="info-box">
-                        <h4>{{ t('info_title', lang) }}</h4>
-                        <ul class="info-list">
-                            <li>{{ t('info_dataset', lang) }}</li>
-                            <li>{{ t('info_model', lang) }}</li>
-                            <li>{{ t('info_accuracy', lang) }}</li>
-                            <li>{{ t('info_explainability', lang) }}</li>
+                    <div style="padding: var(--space-6); background: rgba(33, 150, 243, 0.05); border: 1px solid rgba(33, 150, 243, 0.2); border-radius: var(--radius-md);">
+                        <h4 style="font-size: var(--font-size-lg); margin-bottom: var(--space-4); color: var(--blue-300);">
+                            {{ t('info_title', lang) }}
+                        </h4>
+                        <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                            <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--border-subtle);">
+                                {{ t('info_dataset', lang) }}
+                            </li>
+                            <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--border-subtle);">
+                                {{ t('info_model', lang) }}
+                            </li>
+                            <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--border-subtle);">
+                                {{ t('info_accuracy', lang) }}
+                            </li>
+                            <li style="padding: var(--space-2) 0;">
+                                {{ t('info_explainability', lang) }}
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -205,11 +224,20 @@ document.body.addEventListener('htmx:afterSwap', function(event) {
 });
 
 // Validação employment_days
-document.querySelector('.credit-form').addEventListener('submit', function(e) {
-    const employmentDays = document.getElementById('employment_days');
-    if (employmentDays && parseInt(employmentDays.value) > 0) {
-        alert('Employment days deve ser negativo ou zero');
-        e.preventDefault();
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.credit-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const employmentDaysInput = document.querySelector('input[name="employment_days"]');
+            if (employmentDaysInput && parseInt(employmentDaysInput.value) > 0) {
+                {% if lang == 'pt-BR' %}
+                alert('Dias de emprego deve ser negativo ou zero');
+                {% else %}
+                alert('Employment days must be negative or zero');
+                {% endif %}
+                e.preventDefault();
+            }
+        });
     }
 });
 </script>

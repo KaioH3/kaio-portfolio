@@ -56,7 +56,7 @@ class RiskScoring:
             )
 
         self._model = joblib.load(model_path)
-        logger.info(f"✅ Modelo carregado de {model_path}")
+        logger.info(f"Modelo carregado de {model_path}")
 
     def _init_shap_explainer(self) -> None:
         """Inicializa SHAP explainer"""
@@ -65,10 +65,10 @@ class RiskScoring:
 
             # TreeExplainer para XGBoost
             self._shap_explainer = shap.TreeExplainer(self.model)
-            logger.info("✅ SHAP explainer inicializado")
+            logger.info("SHAP explainer inicializado")
 
         except ImportError:
-            logger.warning("⚠️  SHAP não instalado. Explanations desabilitados.")
+            logger.warning("SHAP não instalado. Explanations desabilitados.")
             self._shap_explainer = None
         except Exception as e:
             logger.error(f"Erro ao inicializar SHAP: {e}")
@@ -150,10 +150,10 @@ class RiskScoring:
     def _get_recommended_action(self, risk_category: RiskCategory, approval_proba: float) -> str:
         """Retorna ação recomendada baseada no risco"""
         actions = {
-            RiskCategory.LOW: f"✅ Aprovação recomendada (confiança: {approval_proba*100:.1f}%)",
-            RiskCategory.MEDIUM: f"⚠️  Análise manual recomendada (confiança: {approval_proba*100:.1f}%)",
-            RiskCategory.HIGH: f"⚠️  Solicitar garantias adicionais (risco: {(1-approval_proba)*100:.1f}%)",
-            RiskCategory.VERY_HIGH: f"❌ Rejeição recomendada (risco: {(1-approval_proba)*100:.1f}%)"
+            RiskCategory.LOW: f"Aprovação recomendada (confiança: {approval_proba*100:.1f}%)",
+            RiskCategory.MEDIUM: f"Análise manual recomendada (confiança: {approval_proba*100:.1f}%)",
+            RiskCategory.HIGH: f"Solicitar garantias adicionais (risco: {(1-approval_proba)*100:.1f}%)",
+            RiskCategory.VERY_HIGH: f"Rejeição recomendada (risco: {(1-approval_proba)*100:.1f}%)"
         }
         return actions[risk_category]
 
@@ -164,12 +164,13 @@ class RiskScoring:
         Returns:
             Dict com top N features e seus SHAP values
         """
-        if self._shap_explainer is None:
+        explainer = self.shap_explainer  # usa property para lazy-loading
+        if explainer is None:
             return {}
 
         try:
             # Calcular SHAP values
-            shap_values = self._shap_explainer.shap_values(X)
+            shap_values = explainer.shap_values(X)
 
             # Pegar valores absolutos (magnitude do impacto)
             shap_abs = np.abs(shap_values[0])

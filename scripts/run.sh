@@ -5,15 +5,15 @@
 
 set -e
 
-echo "🚀 Starting Kaio Portfolio container..."
+echo "Starting Kaio Portfolio container..."
 echo ""
 
 # Load .env file
 if [ -f .env ]; then
   export $(cat .env | grep -v '^#' | xargs)
-  echo "✅ Loaded .env file"
+  echo "Loaded .env file"
 else
-  echo "⚠️  Warning: .env file not found"
+  echo "Warning: .env file not found"
 fi
 
 # Stop existing container if running
@@ -37,7 +37,7 @@ podman run -d \
   kaio-portfolio:latest
 
 echo ""
-echo "✅ Container started!"
+echo "Container started!"
 echo ""
 echo "Access:"
 echo "  • Homepage: http://localhost:8000"

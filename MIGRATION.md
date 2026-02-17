@@ -1,6 +1,6 @@
 # Migração Arquitetural: Local ML → Cloud APIs
 
-## 📊 Contexto e Problema
+## Contexto e Problema
 
 ### Situação Inicial
 - **VPS**: Hetzner CX22 (4GB RAM, 2 vCPU, €5.83/mês)
@@ -14,7 +14,7 @@
   - Outros processos: ~1.6GB
 
 ### Problema
-⚠️ **Impossível adicionar novos projetos ML no mesmo servidor!**
+**Impossível adicionar novos projetos ML no mesmo servidor!**
 
 Com apenas 500MB livres, qualquer novo projeto causaria:
 - Swap excessivo (degradação de performance)
@@ -26,7 +26,7 @@ Liberar RAM para comportar **3-4 projetos ML** no mesmo VPS sem upgrade de hardw
 
 ---
 
-## 🎯 Decisão Arquitetural
+## Decisão Arquitetural
 
 ### Estratégia: Migração Seletiva para Cloud APIs
 
@@ -56,11 +56,11 @@ embeddings = client.embed(texts, model="voyage-3-lite")
 ```
 
 **Trade-off:**
-- ✅ Libera 400MB RAM
-- ✅ Embeddings de maior qualidade (512 dims vs 384)
-- ✅ Free tier generoso (200M tokens = anos de uso)
-- ⚠️ +100ms latência (aceitável para caso de uso)
-- ⚠️ Dependência externa (mitigado com fallback local se necessário)
+-Libera 400MB RAM
+-Embeddings de maior qualidade (512 dims vs 384)
+-Free tier generoso (200M tokens = anos de uso)
+-+100ms latência (aceitável para caso de uso)
+-Dependência externa (mitigado com fallback local se necessário)
 
 #### 2. Vector Store: Qdrant Embedded → Qdrant Cloud
 **Antes:**
@@ -84,34 +84,34 @@ client = QdrantClient(
 ```
 
 **Trade-off:**
-- ✅ Libera 300MB RAM
-- ✅ Storage persistente (sem manutenção de backups locais)
-- ✅ Escalabilidade automática
-- ⚠️ +60ms latência (aceitável)
-- ⚠️ Limite de 1GB (suficiente para ~400K documentos)
+-Libera 300MB RAM
+-Storage persistente (sem manutenção de backups locais)
+-Escalabilidade automática
+-+60ms latência (aceitável)
+-Limite de 1GB (suficiente para ~400K documentos)
 
 ---
 
-## 📈 Resultados
+## Resultados
 
 ### Métricas Antes/Depois
 
 | Métrica | Antes | Depois | Delta |
 |---------|-------|--------|-------|
-| **RAM Doc QA** | ~700MB | ~150MB | **-78%** ✅ |
-| **RAM Total VPS** | ~3.5GB | ~2.5GB | **-1GB** ✅ |
-| **RAM Livre** | ~500MB | ~1.5GB | **+200%** ✅ |
-| **Latência Upload** | ~800ms | ~950ms | +150ms ⚠️ |
-| **Latência Query** | ~1.2s | ~1.5s | +300ms ⚠️ |
-| **Custo Mensal** | €5.83 | €5.83 | **$0** ✅ |
-| **Capacidade Projetos** | 2 | 5-6 | **+150%** ✅ |
+| **RAM Doc QA** | ~700MB | ~150MB | **-78%** |
+| **RAM Total VPS** | ~3.5GB | ~2.5GB | **-1GB** |
+| **RAM Livre** | ~500MB | ~1.5GB | **+200%** |
+| **Latência Upload** | ~800ms | ~950ms | +150ms |
+| **Latência Query** | ~1.2s | ~1.5s | +300ms |
+| **Custo Mensal** | €5.83 | €5.83 | **$0** |
+| **Capacidade Projetos** | 2 | 5-6 | **+150%** |
 
 ### Novos Limites e Quotas
 
 #### Voyage AI (Embeddings)
 - **Free Tier**: 200M tokens one-time grant
 - **Uso estimado**: ~500K tokens/ano (demo portfolio)
-- **Capacidade**: ~400 anos de uso 🚀
+- **Capacidade**: ~400 anos de uso
 - **Rate Limit Implementado**: 1K embeddings/hora (proteção contra abuse)
 
 #### Qdrant Cloud (Vector DB)
@@ -128,7 +128,7 @@ client = QdrantClient(
 
 ---
 
-## 🛡️ Proteções Implementadas
+## Proteções Implementadas
 
 ### 1. Rate Limiting Global
 ```python
@@ -177,7 +177,7 @@ if current_count + len(new_docs) > 10000:
 
 ---
 
-## 🔄 Processo de Migração
+## Processo de Migração
 
 ### Checklist de Execução
 
@@ -208,7 +208,7 @@ if current_count + len(new_docs) > 10000:
 
 ---
 
-## 🎓 Lições Aprendidas
+## Lições Aprendidas
 
 ### 1. **Free Tiers são Production-Ready**
 Voyage AI e Qdrant Cloud provaram que:
@@ -218,9 +218,9 @@ Voyage AI e Qdrant Cloud provaram que:
 
 ### 2. **Trade-offs Bem Documentados Vendem**
 Recrutadores amam transparência:
-- ✅ "Aceitei +150ms latência para liberar 78% de RAM"
-- ✅ "Free tier suporta 400 anos de uso → ROI infinito"
-- ❌ "Migrei porque é moderno" (sem substância)
+-"Aceitei +150ms latência para liberar 78% de RAM"
+-"Free tier suporta 400 anos de uso → ROI infinito"
+- "Migrei porque é moderno" (sem substância)
 
 ### 3. **Monitoramento Preventivo > Reativo**
 Dashboard `/admin/quotas` mostra:
@@ -230,12 +230,12 @@ Dashboard `/admin/quotas` mostra:
 
 ### 4. **Decisões Baseadas em Dados**
 Tabela antes/depois com métricas reais > discurso vago:
-- "Otimizei o sistema" 👎
-- "Reduzi RAM em 78% (700MB → 150MB)" 👍
+- "Otimizei o sistema"
+- "Reduzi RAM em 78% (700MB → 150MB)"
 
 ---
 
-## 🚀 Próximos Passos
+## Próximos Passos
 
 ### Melhorias Futuras
 1. **Caching de Embeddings**: LRU cache para queries repetidas (-50% calls)
@@ -250,11 +250,11 @@ Com 1.5GB livres, cabe:
 - Time Series Forecasting (~250MB)
 - Recommendation Engine (~400MB)
 
-**Total**: 4-5 projetos ML no mesmo VPS de €5.83/mês 🎯
+**Total**: 4-5 projetos ML no mesmo VPS de €5.83/mês
 
 ---
 
-## 📚 Referências
+## Referências
 
 - [Voyage AI Documentation](https://docs.voyageai.com/)
 - [Qdrant Cloud Pricing](https://qdrant.tech/pricing/)
@@ -266,4 +266,4 @@ Com 1.5GB livres, cabe:
 **Data da Migração**: 2026-02-15
 **Tempo de Implementação**: 4 horas
 **Downtime**: 0 minutos (blue-green deployment)
-**Bugs Pós-Deploy**: 0 🎉
+**Bugs Pós-Deploy**: 0

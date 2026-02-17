@@ -1,4 +1,4 @@
-# 🎯 ML Engineer Portfolio
+# ML Engineer Portfolio
 
 <div align="center">
 
@@ -13,68 +13,68 @@ Portfolio profissional demonstrando arquitetura ML escalável, trade-offs de eng
 [![Podman](https://img.shields.io/badge/Podman-892CA0?logo=podman&logoColor=white)](https://podman.io/)
 [![Security](https://img.shields.io/badge/Security-OWASP-green)](app/middleware/security.py)
 
-[📖 Documentação](#-documentação) •
-[🚀 Deploy](#-deploy) •
-[🧪 Testes](#-testes) •
-[💬 Contato](#-contato)
+[Documentação](#documentação) •
+[Deploy](#deploy) •
+[Testes](#testes) •
+[Contato](#contato)
 
 </div>
 
 ---
 
-## 📌 Destaques
+## Destaques
 
-- ⚡ **Zero custo operacional** até escala (R$530/mês → R$0/mês via free tiers)
-- 🔒 **Production-ready security** (OWASP Top 10, rate limiting, CORS, CSP)
-- 📊 **Explicabilidade** (SHAP values para compliance regulatório)
-- 🌍 **i18n completo** (PT-BR/EN-US em todos os projetos)
-- 🐳 **Deploy automatizado** (Podman + Caddy + SSL automático)
-- 📈 **Observabilidade** (Prometheus metrics, structured logging)
-- ✅ **100% type annotated** (mypy strict mode)
+- **Zero custo operacional** até escala (R$530/mês → R$0/mês via free tiers)
+- **Production-ready security** (OWASP Top 10, rate limiting, CORS, CSP)
+- **Explicabilidade** (SHAP values para compliance regulatório)
+- **i18n completo** (PT-BR/EN-US em todos os projetos)
+- **Deploy automatizado** (Podman + Caddy + SSL automático)
+- **Observabilidade** (Prometheus metrics, structured logging)
+- **100% type annotated** (mypy strict mode)
 
-## 🎨 Projetos
+## Projetos
 
-### 1. 📄 Doc QA - Intelligent Document Assistant
+### 1. Doc QA - Intelligent Document Assistant
 
 > Sistema de Retrieval-Augmented Generation com Chain-of-Verification para reduzir alucinações em 80%
 
-**🎯 Objetivo**: Demonstrar trade-offs inteligentes de engenharia
-**💰 Economia**: R$530/mês → R$0/mês (100% free tier)
-**🔧 Stack**: FastEmbed (local), Qdrant (embedded), Groq (free tier), HTMX
-**📍 Endpoint**: `/doc-qa/`
+**Objetivo**: Demonstrar trade-offs inteligentes de engenharia
+**Economia**: R$530/mês → R$0/mês (100% free tier)
+**Stack**: FastEmbed (local), Qdrant (embedded), Groq (free tier), HTMX
+**Endpoint**: `/doc-qa/`
 
 **Features**:
-- ✅ Upload de PDFs/TXT com processamento assíncrono
-- ✅ Busca híbrida (semântica + BM25 reranking) +15% accuracy
-- ✅ Chain-of-Verification (-80% hallucinations)
-- ✅ Rate limiting inteligente (15 queries/mês por IP)
-- ✅ i18n (PT-BR/EN-US automático via Accept-Language)
+- Upload de PDFs/TXT com processamento assíncrono
+- Busca híbrida (semântica + BM25 reranking) +15% accuracy
+- Chain-of-Verification (-80% hallucinations)
+- Rate limiting inteligente (15 queries/mês por IP)
+- i18n (PT-BR/EN-US automático via Accept-Language)
 
 **Performance**: 280ms p50, 450ms p99 | **Accuracy**: 95% vs OpenAI | **Hallucination**: 2%
 
-📖 [Documentação completa](app/projects/docqa/README.md)
+[Documentação completa](app/projects/docqa/README.md)
 
 ---
 
-### 2. 💳 Credit Risk Scoring API
+### 2. Credit Risk Scoring API
 
 > Sistema de análise de risco de crédito com XGBoost + SHAP para explicabilidade regulatória
 
-**🎯 Objetivo**: Scoring interpretável para decisões de crédito
-**📊 Dataset**: 430k applications (Kaggle - 97k downloads)
-**🔧 Stack**: XGBoost, SHAP, Scikit-learn, Pandas, HTMX
-**📍 Endpoint**: `/credit-risk/`
+**Objetivo**: Scoring interpretável para decisões de crédito
+**Dataset**: 430k applications (Kaggle - 97k downloads)
+**Stack**: XGBoost, SHAP, Scikit-learn, Pandas, HTMX
+**Endpoint**: `/credit-risk/`
 
 **Features**:
-- ✅ Predição de risco com 30+ features engineered
-- ✅ SHAP explanations (Shapley values) para compliance
-- ✅ API JSON + interface interativa HTMX
-- ✅ Pipeline completo de feature engineering
-- ✅ Testes com 100% coverage
+- Predição de risco com 30+ features engineered
+- SHAP explanations (Shapley values) para compliance
+- API JSON + interface interativa HTMX
+- Pipeline completo de feature engineering
+- Testes com 100% coverage
 
 **Métricas**: AUC-ROC > 0.75 | **Latência**: <100ms (p95) | **Throughput**: ~100 req/s
 
-📖 [Documentação completa](app/projects/creditrisk/README.md)
+[Documentação completa](app/projects/creditrisk/README.md)
 
 ## Tech Stack
 
@@ -100,7 +100,7 @@ Portfolio profissional demonstrando arquitetura ML escalável, trade-offs de eng
 - Caddy 2 (reverse proxy)
 - Systemd (process management)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Pré-requisitos
 
@@ -126,7 +126,7 @@ cp .env.example .env
 uvicorn app.main:app --reload
 ```
 
-🌐 **Acesse**: `http://localhost:8000`
+**Acesse**: `http://localhost:8000`
 
 ### Configuração Kaggle (para Credit Risk)
 
@@ -138,7 +138,7 @@ mv ~/Downloads/kaggle.json ~/.kaggle/
 chmod 600 ~/.kaggle/kaggle.json
 ```
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 kaio-portfolio/
@@ -170,7 +170,7 @@ kaio-portfolio/
 - `templates/` - Jinja2 templates específicos
 - `static/` - CSS específico do projeto
 
-## 🧪 Testes
+## Testes
 
 ```bash
 # Todos os testes (unit + integration)
@@ -191,7 +191,7 @@ pytest -m "not slow"
 
 **Coverage atual**: ~85% (target: 90%)
 
-## 📖 Documentação
+## Documentação
 
 | Documento | Descrição |
 |-----------|-----------|
@@ -204,30 +204,30 @@ pytest -m "not slow"
 | **Swagger UI** | `/docs` (apenas em development) |
 | **ReDoc** | `/redoc` (apenas em development) |
 
-## 🔒 Segurança
+## Segurança
 
-✅ **OWASP Top 10 Protection**
+**OWASP Top 10 Protection**
 - SQL Injection: N/A (sem SQL direto, Pydantic validation)
 - XSS: Content-Security-Policy headers, HTML escaping
 - CSRF: SameSite cookies, CORS restrito
 - Sensitive Data: API keys via env vars, nunca em logs
 - Broken Access Control: Rate limiting, quota tracking
 
-✅ **Application Security**
+**Application Security**
 - Input validation via Pydantic (strict schemas)
 - Enum-based sanitization para dados categóricos
 - IP-based rate limiting (15 queries/mês para Doc QA)
 - CORS configurável (whitelist de origins)
 - Security headers (HSTS, CSP, X-Frame-Options)
 
-✅ **Container Security**
+**Container Security**
 - Rootless containers (user `appuser:1000`)
 - Read-only filesystem onde possível
 - Security options (`no-new-privileges`)
 - Resource limits (CPU/Memory)
 - Multi-stage build (menor surface attack)
 
-## ⚡ Performance
+## Performance
 
 ### Credit Risk API
 | Métrica | Valor |
@@ -251,7 +251,7 @@ pytest -m "not slow"
 | **Accuracy** | 95% (vs OpenAI: 100%) |
 | **Hallucination Rate** | 2% (vs standard RAG: 10%) |
 
-## 🐳 Deploy
+## Deploy
 
 ### Local (Development)
 
@@ -286,9 +286,9 @@ podman-compose -f podman-compose.yml up -d
 - **Storage**: 10GB (datasets + models)
 - **OS**: Ubuntu 22.04+ ou Fedora 38+
 
-📖 **Guia completo**: [DEPLOYMENT.md](DEPLOYMENT.md)
+**Guia completo**: [DEPLOYMENT.md](DEPLOYMENT.md)
 
-## 🏗️ Princípios de Arquitetura
+## Princípios de Arquitetura
 
 1. **Cost-conscious scaling** - R$0/mês até validação de mercado (free tiers)
 2. **Measured trade-offs** - Cada decisão técnica tem métricas (latência, accuracy, cost)
@@ -298,7 +298,7 @@ podman-compose -f podman-compose.yml up -d
 6. **Testability** - Unit + integration tests, >85% coverage
 7. **Graceful degradation** - Fallback chains (Groq → Perplexity → Ollama)
 
-## 🛠️ Desenvolvido Com
+## Desenvolvido Com
 
 <table>
 <tr>
@@ -339,19 +339,19 @@ Pytest • Black • Mypy • Ruff • Pre-commit hooks
 </tr>
 </table>
 
-## 🎓 Por Que Este Portfolio?
+## Por Que Este Portfolio?
 
 Este projeto demonstra:
 
-✅ **Engenharia de ML além de notebooks** - Pipeline completo (data → training → serving → monitoring)
-✅ **Trade-offs conscientes** - Decisões técnicas baseadas em métricas reais
-✅ **Production-ready code** - Security, performance, observability, tests
-✅ **Zero para produção** - Scripts automatizados de setup e deploy
-✅ **Escalabilidade planejada** - Arquitetura que cresce de R$0/mês → enterprise
+**Engenharia de ML além de notebooks** - Pipeline completo (data → training → serving → monitoring)
+**Trade-offs conscientes** - Decisões técnicas baseadas em métricas reais
+**Production-ready code** - Security, performance, observability, tests
+**Zero para produção** - Scripts automatizados de setup e deploy
+**Escalabilidade planejada** - Arquitetura que cresce de R$0/mês → enterprise
 
 **Não é apenas código - é uma demonstração de maturidade em ML Engineering.**
 
-## 📈 Roadmap
+## Roadmap
 
 - [ ] GitHub Actions CI/CD (pytest + build + deploy automático)
 - [ ] Grafana dashboard para métricas Prometheus
@@ -361,7 +361,7 @@ Este projeto demonstra:
 - [ ] Kubernetes manifests (escala > 10k req/dia)
 - [ ] OpenTelemetry distributed tracing
 
-## 🤝 Contribuindo
+## Contribuindo
 
 Este é um portfolio pessoal, mas contribuições são bem-vindas!
 
@@ -377,11 +377,11 @@ Este é um portfolio pessoal, mas contribuições são bem-vindas!
 - Type hints obrigatórios
 - Testes para novas features
 
-## 📄 Licença
+## Licença
 
 Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
 
-## 💬 Contato
+## Contato
 
 **Kaio H. Siqueira**
 Backend Engineer → ML/AI | 12 anos de experiência
@@ -395,8 +395,8 @@ Backend Engineer → ML/AI | 12 anos de experiência
 
 <div align="center">
 
-**⭐ Se este projeto ajudou você, considere dar uma estrela!**
+**Se este projeto ajudou você, considere dar uma estrela!**
 
-Feito com ❤️ e Python 🐍
+Feito com Python
 
 </div>

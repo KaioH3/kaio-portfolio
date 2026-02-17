@@ -40,11 +40,11 @@ TRANSLATIONS = {
 
     # === TRANSFORMAÇÃO ===
     "transformation_title": "Imagine Você...",
-    "transformation_1": "✨ Trabalhando de casa, no seu horário",
-    "transformation_2": "💰 Faturando R$ 3.000+ por mês",
-    "transformation_3": "👨‍👩‍👧 Com mais tempo para sua família",
-    "transformation_4": "🎯 Sendo sua própria chefe",
-    "transformation_5": "🌟 Reconhecida como profissional de qualidade",
+    "transformation_1": "Trabalhando de casa, no seu horário",
+    "transformation_2": "Faturando R$ 3.000+ por mês",
+    "transformation_3": "Com mais tempo para sua família",
+    "transformation_4": "Sendo sua própria chefe",
+    "transformation_5": "Reconhecida como profissional de qualidade",
 
     # === COMO FUNCIONA ===
     "how_it_works_title": "Como Funciona",
@@ -57,23 +57,23 @@ TRANSLATIONS = {
 
     # === BÔNUS ===
     "bonus_title": "Bônus Exclusivos",
-    "bonus_1_title": "🎁 Kit de Materiais (PDF)",
+    "bonus_1_title": "Kit de Materiais (PDF)",
     "bonus_1_value": "Valor: R$ 47",
     "bonus_1_desc": "Lista completa de fornecedores confiáveis com desconto",
-    "bonus_2_title": "📱 Grupo VIP WhatsApp",
+    "bonus_2_title": "Grupo VIP WhatsApp",
     "bonus_2_value": "Valor: R$ 97",
     "bonus_2_desc": "Suporte direto com a professora e networking com outras alunas",
-    "bonus_3_title": "📄 Certificado Profissional",
+    "bonus_3_title": "Certificado Profissional",
     "bonus_3_value": "Valor: R$ 67",
     "bonus_3_desc": "Certificado reconhecido para comprovar sua qualificação",
 
     # === GARANTIA ===
     "guarantee_title": "Garantia Incondicional de 7 Dias",
     "guarantee_text": "Se você não gostar do curso por qualquer motivo, devolvemos 100% do seu dinheiro. Sem perguntas, sem burocracia.",
-    "guarantee_badge": "🛡️ Risco Zero",
+    "guarantee_badge": "Risco Zero",
 
     # === URGÊNCIA ===
-    "urgency_title": "⚠️ Atenção: Oferta Especial por Tempo Limitado",
+    "urgency_title": "Atenção: Oferta Especial por Tempo Limitado",
     "urgency_timer_text": "Esta oferta expira em:",
     "urgency_spots_text": "Restam apenas 7 vagas com desconto!",
 

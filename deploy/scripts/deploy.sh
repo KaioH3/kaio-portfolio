@@ -5,30 +5,30 @@
 
 set -e
 
-echo "🚀 Deploying Kaio Portfolio to Production..."
+echo "Deploying Kaio Portfolio to Production..."
 
 # Build image
-echo "📦 Building container image..."
+echo "Building container image..."
 cd ..
 podman build -t kaio-portfolio-api:latest -f containerfiles/Containerfile.api .
 
 # Stop existing containers
-echo "⏸️  Stopping existing containers..."
+echo "Stopping existing containers..."
 podman-compose -f deploy/podman-compose.yml down || true
 
 # Start new containers
-echo "▶️  Starting new containers..."
+echo "Starting new containers..."
 podman-compose -f deploy/podman-compose.yml up -d
 
 # Show status
 echo ""
-echo "✅ Deployment complete!"
+echo "Deployment complete!"
 echo ""
-echo "🔍 Container status:"
+echo "Container status:"
 podman ps
 
 echo ""
-echo "📊 Health check:"
+echo "Health check:"
 sleep 5
 curl -s http://localhost:8000/api/health | jq
 

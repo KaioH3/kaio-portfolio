@@ -1,12 +1,12 @@
 # Rate Limiting Global + Dashboard de Quotas
 
-## ✅ Implementação Completa
+## Implementação Completa
 
 Sistema de proteção em 3 camadas para APIs externas (Voyage AI, Qdrant Cloud, Groq) com dashboard administrativo.
 
 ---
 
-## 📦 Arquivos Criados
+## Arquivos Criados
 
 ### Middleware Layer
 ```
@@ -38,7 +38,7 @@ scripts/
 
 ---
 
-## 📝 Arquivos Modificados
+## Arquivos Modificados
 
 ### Integração nos Services
 
@@ -78,7 +78,7 @@ scripts/
 
 ---
 
-## 🎯 Funcionalidades
+## Funcionalidades
 
 ### Camada 2: Global Rate Limiter
 
@@ -91,7 +91,7 @@ scripts/
 | `qdrant_writes`     | 100/h  | Evita spam de indexação         |
 | `groq_queries`      | 500/h  | Respeita free tier              |
 
-**Thread-safe:** ✅ `threading.Lock`
+**Thread-safe:** `threading.Lock`
 
 ### Camada 3: Quota Tracker
 
@@ -145,7 +145,7 @@ scripts/
 
 ---
 
-## 🧪 Testes
+## Testes
 
 ### Execução
 ```bash
@@ -163,20 +163,20 @@ pytest tests/test_rate_limiting_integration.py -v
 ```
 
 ### Cobertura
-✅ **18/18 testes passando (100%)**
+**18/18 testes passando (100%)**
 
-- ✅ Rate limiting (permite até limite, bloqueia depois)
-- ✅ Reset automático após 1 hora
-- ✅ Thread safety (acesso concorrente seguro)
-- ✅ Quota tracking (persistência entre restarts)
-- ✅ Dashboard (dados em tempo real corretos)
-- ✅ Error handling (arquivos corrompidos, etc)
-- ✅ Singleton pattern
-- ✅ HTTPException 429 nos limites
+- Rate limiting (permite até limite, bloqueia depois)
+- Reset automático após 1 hora
+- Thread safety (acesso concorrente seguro)
+- Quota tracking (persistência entre restarts)
+- Dashboard (dados em tempo real corretos)
+- Error handling (arquivos corrompidos, etc)
+- Singleton pattern
+- HTTPException 429 nos limites
 
 ---
 
-## 🚀 Como Usar
+## Como Usar
 
 ### 1. Rodar Testes
 ```bash
@@ -210,31 +210,31 @@ curl http://localhost:8000/admin/quotas | jq .quota_usage_cumulative
 
 ---
 
-## 🔒 Proteções Implementadas
+## Proteções Implementadas
 
-✅ **Proteção contra abuse de APIs externas**
+**Proteção contra abuse de APIs externas**
 - Rate limiting por recurso (voyage, qdrant, groq)
 - HTTPException 429 quando limites excedidos
 - Mensagens claras de erro
 
-✅ **Thread Safety**
+**Thread Safety**
 - `threading.Lock` em todas as operações críticas
 - Singleton pattern consistente
 - Acesso concorrente seguro
 
-✅ **Persistência de Dados**
+**Persistência de Dados**
 - Quotas salvam em `./data/quota_usage.json`
 - Sobrevive restarts do servidor
 - Recovery de arquivos corrompidos
 
-✅ **Lazy Imports**
+**Lazy Imports**
 - Evita dependências circulares
 - Import apenas quando necessário
 - Fallback em caso de erro
 
 ---
 
-## 📊 Benefícios para Recrutadores
+## Benefícios para Recrutadores
 
 ### Demonstra:
 
@@ -262,11 +262,11 @@ curl http://localhost:8000/admin/quotas | jq .quota_usage_cumulative
 
 ---
 
-## 📚 Documentação Completa
+## Documentação Completa
 
 Para documentação técnica detalhada, veja:
 
-📖 **[app/middleware/README.md](app/middleware/README.md)**
+**[app/middleware/README.md](app/middleware/README.md)**
 - Arquitetura em 3 camadas
 - Exemplos de uso
 - API reference completa
@@ -275,13 +275,13 @@ Para documentação técnica detalhada, veja:
 
 ---
 
-## ✅ Checklist de Verificação
+## Checklist de Verificação
 
 - [x] Middleware criado (`rate_limit.py` + `quota_tracker.py`)
 - [x] Services integrados (embeddings, vector_store, generation)
 - [x] Router admin criado e registrado
-- [x] Testes unitários (11/11 ✅)
-- [x] Testes de integração (7/7 ✅)
+- [x] Testes unitários (11/11)
+- [x] Testes de integração (7/7)
 - [x] Documentação completa
 - [x] Script de verificação
 - [x] Thread safety validado
@@ -290,11 +290,11 @@ Para documentação técnica detalhada, veja:
 
 ---
 
-## 🎉 Status: IMPLEMENTAÇÃO COMPLETA
+## Status: IMPLEMENTAÇÃO COMPLETA
 
 Sistema totalmente funcional, testado e documentado. Pronto para uso em produção.
 
-**Total de testes:** 18/18 passando ✅
+**Total de testes:** 18/18 passando
 **Cobertura:** 100%
 **Arquivos criados:** 7
 **Arquivos modificados:** 4

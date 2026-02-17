@@ -176,9 +176,9 @@ async def capture_lead(
         return HTMLResponse(
             content=f"""
             <div class="lead-success">
-                <h3>✅ Obrigada, {lead.nome}!</h3>
+                <h3>Obrigada, {lead.nome}!</h3>
                 <p>Em breve você receberá mais informações no email <strong>{lead.email}</strong>.</p>
-                <p>Fique de olho na caixa de entrada e no spam! 📧</p>
+                <p>Fique de olho na caixa de entrada e no spam!</p>
             </div>
             """,
             status_code=200,
@@ -189,7 +189,7 @@ async def capture_lead(
         return HTMLResponse(
             content=f"""
             <div class="lead-error">
-                <p>❌ Ops! Algo deu errado. Tente novamente ou entre em contato via WhatsApp.</p>
+                <p>Ops! Algo deu errado. Tente novamente ou entre em contato via WhatsApp.</p>
             </div>
             """,
             status_code=400,

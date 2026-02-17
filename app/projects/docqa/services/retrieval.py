@@ -24,9 +24,12 @@ class RetrievalService:
     ) -> List[RetrievedChunk]:
         k = top_k or self.top_k
         query_embedding = self.embeddings.embed_query(query)
+        # When filtering by a specific document, skip score_threshold so we
+        # always return chunks from that document even for vague questions.
+        threshold = None if filter_dict else rag_config.MIN_SIMILARITY_SCORE
         chunks = self.vector_store.search(
             query_embedding=query_embedding, top_k=k,
-            score_threshold=rag_config.MIN_SIMILARITY_SCORE,
+            score_threshold=threshold,
             filter_dict=filter_dict,
         )
         if len(chunks) > 1:

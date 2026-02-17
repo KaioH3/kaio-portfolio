@@ -67,18 +67,26 @@ class GenerationService:
         ctx_parts = []
         for i, c in enumerate(chunks[:3], 1):
             src = f"{c.metadata.filename} (chunk {c.metadata.chunk_index})"
-            ctx_parts.append(f"[{i}] {src}\n{c.text[:600]}")
+            # Strip leading/trailing whitespace and limit to 500 chars
+            clean_text = " ".join(c.text.split())[:500]
+            ctx_parts.append(f"[{i}] {src}\n{clean_text}")
         ctx = "\n\n".join(ctx_parts)
 
-        return f"""You are a helpful AI assistant. Answer based ONLY on the context below.
-Rules: 1) Use ONLY context info. 2) If not in context, say so. 3) Cite [1],[2],[3]. 4) Be concise.
+        return f"""You are a concise document assistant. Answer the question using ONLY the provided context.
+
+Rules:
+- Answer in 2-4 sentences maximum.
+- Do NOT repeat phrases or sentences.
+- Do NOT copy code blocks or lists verbatim.
+- Cite sources as [1], [2], [3].
+- If the answer is not in the context, say "I don't have enough information in the document."
 
 Context:
 {ctx}
 
 Question: {query}
 
-Answer:"""
+Answer (2-4 sentences):"""
 
     async def _generate_groq(self, prompt: str, max_tokens: Optional[int]) -> Dict[str, Any]:
         """Groq FREE tier - llama-3.1-8b-instant"""
@@ -90,7 +98,9 @@ Answer:"""
             "model": rag_config.GROQ_MODEL,
             "messages": [{"role": "user", "content": prompt}],
             "max_tokens": max_tokens or rag_config.GROQ_MAX_TOKENS,
-            "temperature": 0.2,
+            "temperature": 0.1,
+            "frequency_penalty": 0.6,
+            "presence_penalty": 0.3,
         }
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             resp = await client.post(url, json=payload, headers=headers)

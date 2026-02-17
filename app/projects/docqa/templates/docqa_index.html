@@ -7,71 +7,75 @@
 {% endblock %}
 
 {% block content %}
-<!-- Doc QA Hero Section -->
-<section class="docqa-hero">
+<!-- Hero Section -->
+<section class="hero">
     <div class="container">
-        <div class="docqa-hero__header">
-            <div class="docqa-hero__content">
-                <h1 class="docqa-hero__title">{{ t('page_title', lang) }}</h1>
-                <p class="docqa-hero__subtitle">{{ t('page_subtitle', lang) }}</p>
-
-                <!-- Project Highlights - Show off technical skills -->
-                <div class="docqa-features">
-                    {% if lang == 'pt-BR' %}
-                    <div class="feature-tag">🚀 RAG com Chain-of-Verification</div>
-                    <div class="feature-tag">🔍 Busca Híbrida (Semântica + BM25)</div>
-                    <div class="feature-tag">⚡ Latência <2s</div>
-                    <div class="feature-tag">💰 $0/mês (Free Tiers)</div>
-                    {% else %}
-                    <div class="feature-tag">🚀 RAG with Chain-of-Verification</div>
-                    <div class="feature-tag">🔍 Hybrid Search (Semantic + BM25)</div>
-                    <div class="feature-tag">⚡ <2s Latency</div>
-                    <div class="feature-tag">💰 $0/month (Free Tiers)</div>
-                    {% endif %}
-                </div>
-
-                <!-- Architecture Overview - For Recruiters -->
-                <div class="architecture-banner">
-                    {% if lang == 'pt-BR' %}
-                    <strong>Arquitetura:</strong>
-                    Voyage AI (embeddings) → Qdrant Cloud (vector search) → Groq (LLM) → Verificação de Fatos
-                    {% else %}
-                    <strong>Architecture:</strong>
-                    Voyage AI (embeddings) → Qdrant Cloud (vector search) → Groq (LLM) → Fact Verification
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Language Toggle -->
+        <!-- Language Toggle -->
+        <div class="lang-toggle-wrapper">
             <div class="lang-toggle">
-                <a href="?lang=pt-BR" class="lang-toggle__btn {% if lang == 'pt-BR' %}lang-toggle__btn--active{% endif %}">🇧🇷 PT</a>
-                <a href="?lang=en-US" class="lang-toggle__btn {% if lang == 'en-US' %}lang-toggle__btn--active{% endif %}">🇺🇸 EN</a>
+                <a href="?lang=pt-BR" class="lang-toggle__btn {% if lang == 'pt-BR' %}lang-toggle__btn--active{% endif %}">PT</a>
+                <a href="?lang=en-US" class="lang-toggle__btn {% if lang == 'en-US' %}lang-toggle__btn--active{% endif %}">EN</a>
             </div>
+        </div>
+
+        <h1 class="hero-title">{{ t('page_title', lang) }}</h1>
+        <p class="hero-description">{{ t('page_subtitle', lang) }}</p>
+
+        <!-- Project Highlights -->
+        <div class="hero-badges">
+            {% if lang == 'pt-BR' %}
+            <span class="badge badge--primary">RAG com Chain-of-Verification</span>
+            <span class="badge badge--success">Busca Híbrida (Semântica + BM25)</span>
+            <span class="badge badge--info">Latência &lt;2s</span>
+            <span class="badge badge--warning">$0/mês (Free Tiers)</span>
+            {% else %}
+            <span class="badge badge--primary">RAG with Chain-of-Verification</span>
+            <span class="badge badge--success">Hybrid Search (Semantic + BM25)</span>
+            <span class="badge badge--info">&lt;2s Latency</span>
+            <span class="badge badge--warning">$0/month (Free Tiers)</span>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Architecture Overview Card -->
+<section class="container" style="margin-top: var(--space-8);">
+    <div class="card card--info">
+        <div class="card-body">
+            <h3 style="margin-bottom: var(--space-3); color: var(--blue-300);">
+                {% if lang == 'pt-BR' %}Arquitetura{% else %}Architecture{% endif %}
+            </h3>
+            <p style="color: var(--text-secondary);">
+                {% if lang == 'pt-BR' %}
+                Voyage AI (embeddings) → Qdrant Cloud (vector search) → Groq (LLM) → Verificação de Fatos
+                {% else %}
+                Voyage AI (embeddings) → Qdrant Cloud (vector search) → Groq (LLM) → Fact Verification
+                {% endif %}
+            </p>
         </div>
     </div>
 </section>
 
 <!-- Main Content -->
-<section class="container docqa-content">
+<section class="container" style="margin-top: var(--space-12);">
     <!-- Upload Section -->
-    <div class="card docqa-section">
+    <div class="card" style="margin-bottom: var(--space-8);">
         <div class="card-body">
-            <h2 class="docqa-section__title">
-                📤 {{ t('upload_section_title', lang) }}
+            <h2 style="font-size: var(--font-size-2xl); margin-bottom: var(--space-6); color: var(--text-primary);">
+                {{ t('upload_section_title', lang) }}
             </h2>
 
-            <form method="POST" action="/docqa/upload?lang={{ lang }}"
-                  enctype="multipart/form-data"
+            <form enctype="multipart/form-data"
                   hx-post="/docqa/upload?lang={{ lang }}"
                   hx-encoding="multipart/form-data"
                   hx-target="#upload-result"
-                  hx-indicator="#upload-indicator">
+                  hx-indicator="#upload-indicator"
+                  hx-swap="innerHTML">
 
                 <div class="form-group">
-                    <label class="form-label">{{ t('upload_file_label', lang) }}</label>
-                    <input type="file" name="file" accept=".pdf,.txt,.md" required class="form-input">
+                    <label for="file-upload" class="form-label">{{ t('upload_file_label', lang) }}</label>
+                    <input type="file" id="file-upload" name="file" accept=".pdf,.txt,.md" required class="form-input">
 
-                    <!-- Technical Details for Recruiters -->
                     <small class="form-help">
                         {% if lang == 'pt-BR' %}
                         Máx 10MB • Chunking: 400 tokens com overlap de 50 • Hash SHA-256 para deduplicação
@@ -92,26 +96,27 @@
     </div>
 
     <!-- Query Section -->
-    <div class="card docqa-section">
+    <div class="card" style="margin-bottom: var(--space-8);">
         <div class="card-body">
-            <h2 class="docqa-section__title">
-                💬 {{ t('query_section_title', lang) }}
+            <h2 style="font-size: var(--font-size-2xl); margin-bottom: var(--space-6); color: var(--text-primary);">
+                {{ t('query_section_title', lang) }}
             </h2>
 
-            <form method="POST" action="/docqa/query?lang={{ lang }}"
-                  hx-post="/docqa/query?lang={{ lang }}"
+            <form hx-post="/docqa/query?lang={{ lang }}"
                   hx-target="#answer-container"
-                  hx-indicator="#query-indicator">
+                  hx-indicator="#query-indicator"
+                  hx-swap="innerHTML"
+                  hx-include="#active-document-id">
 
                 <div class="form-group">
-                    <label class="form-label">{{ t('query_input_placeholder', lang) }}</label>
+                    <label for="question-input" class="form-label">{{ t('query_input_placeholder', lang) }}</label>
                     <input type="text"
+                           id="question-input"
                            name="question"
                            placeholder="{{ t('query_input_placeholder', lang) }}"
                            required
                            class="form-input">
 
-                    <!-- Retrieval Details -->
                     <small class="form-help">
                         {% if lang == 'pt-BR' %}
                         Retrieval: Top-5 chunks → Rerank com BM25 → Top-3 para contexto
@@ -122,10 +127,12 @@
                 </div>
 
                 <div class="checkbox-group">
-                    <input type="checkbox" id="verify" name="enable_verification" value="true">
-                    <label for="verify">
-                        {{ t('query_verification_label', lang) }}
-                    </label>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="verify" name="enable_verification" value="true">
+                        <label for="verify">
+                            {{ t('query_verification_label', lang) }}
+                        </label>
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -138,23 +145,25 @@
         </div>
     </div>
 
-    <!-- Technical Stack & Performance Metrics - For Recruiters -->
-    <div class="docqa-footer">
-        <div class="tech-stack-section">
-            <h3>
+    <!-- Technical Stack & Performance Metrics -->
+    <div class="card" style="margin-bottom: var(--space-8);">
+        <div class="card-body">
+            <h3 style="font-size: var(--font-size-xl); margin-bottom: var(--space-6); text-align: center;">
                 {% if lang == 'pt-BR' %}
-                🛠️ Stack Tecnológica de Produção
+                Stack Tecnológica de Produção
                 {% else %}
-                🛠️ Production Tech Stack
+                Production Tech Stack
                 {% endif %}
             </h3>
-            <p>{{ t('footer_tech_stack', lang) }}</p>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: var(--space-8);">
+                {{ t('footer_tech_stack', lang) }}
+            </p>
 
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-value">~150MB</div>
-                    <div class="metric-label">RAM Usage</div>
-                    <small class="metric-detail">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-6); margin-bottom: var(--space-8);">
+                <div class="stat-card">
+                    <div class="stat-value">~150MB</div>
+                    <div class="stat-label">RAM Usage</div>
+                    <small style="display: block; margin-top: var(--space-2); color: var(--text-muted);">
                         {% if lang == 'pt-BR' %}
                         78% redução vs local ML
                         {% else %}
@@ -162,12 +171,12 @@
                         {% endif %}
                     </small>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value">&lt;2s</div>
-                    <div class="metric-label">
+                <div class="stat-card">
+                    <div class="stat-value">&lt;2s</div>
+                    <div class="stat-label">
                         {% if lang == 'pt-BR' %}Latência{% else %}Latency{% endif %}
                     </div>
-                    <small class="metric-detail">
+                    <small style="display: block; margin-top: var(--space-2); color: var(--text-muted);">
                         {% if lang == 'pt-BR' %}
                         End-to-end (upload → resposta)
                         {% else %}
@@ -175,12 +184,12 @@
                         {% endif %}
                     </small>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value">$0</div>
-                    <div class="metric-label">
+                <div class="stat-card">
+                    <div class="stat-value">$0</div>
+                    <div class="stat-label">
                         {% if lang == 'pt-BR' %}Custo/mês{% else %}Cost/month{% endif %}
                     </div>
-                    <small class="metric-detail">
+                    <small style="display: block; margin-top: var(--space-2); color: var(--text-muted);">
                         {% if lang == 'pt-BR' %}
                         Voyage + Qdrant + Groq free tiers
                         {% else %}
@@ -188,10 +197,10 @@
                         {% endif %}
                     </small>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value">200M</div>
-                    <div class="metric-label">Tokens</div>
-                    <small class="metric-detail">
+                <div class="stat-card">
+                    <div class="stat-value">200M</div>
+                    <div class="stat-label">Tokens</div>
+                    <small style="display: block; margin-top: var(--space-2); color: var(--text-muted);">
                         {% if lang == 'pt-BR' %}
                         Voyage AI quota (vitalício)
                         {% else %}
@@ -200,54 +209,48 @@
                     </small>
                 </div>
             </div>
-        </div>
 
-        <!-- Key Features for Recruiters -->
-        <div class="key-features">
-            <h3>
+            <!-- Key Features -->
+            <h3 style="font-size: var(--font-size-xl); margin-bottom: var(--space-4); text-align: center;">
                 {% if lang == 'pt-BR' %}
-                ✨ Destaques Técnicos
+                Destaques Técnicos
                 {% else %}
-                ✨ Technical Highlights
+                Technical Highlights
                 {% endif %}
             </h3>
-            <ul class="features-list">
+            <ul style="list-style: none; padding: 0; max-width: 800px; margin: 0 auto;">
                 {% if lang == 'pt-BR' %}
-                <li><strong>Chain-of-Verification:</strong> Reduz alucinações do LLM via verificação multi-step</li>
-                <li><strong>Hybrid Search:</strong> Combina busca semântica (embeddings) + lexical (BM25)</li>
-                <li><strong>Deduplicação:</strong> SHA-256 hash previne documentos duplicados</li>
-                <li><strong>Rate Limiting:</strong> 15 queries/IP/mês (proteção contra abuso)</li>
-                <li><strong>Multi-provider LLM:</strong> Fallback chain Groq → Perplexity → OpenAI</li>
-                <li><strong>Observabilidade:</strong> Structured logging + métricas de latência</li>
+                <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-default);"><strong>Chain-of-Verification:</strong> Reduz alucinações do LLM via verificação multi-step</li>
+                <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-default);"><strong>Hybrid Search:</strong> Combina busca semântica (embeddings) + lexical (BM25)</li>
+                <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-default);"><strong>Deduplicação:</strong> SHA-256 hash previne documentos duplicados</li>
+                <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-default);"><strong>Rate Limiting:</strong> 15 queries/IP/mês (proteção contra abuso)</li>
+                <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-default);"><strong>Multi-provider LLM:</strong> Fallback chain Groq → Perplexity → OpenAI</li>
+                <li style="padding: var(--space-3) 0;"><strong>Observabilidade:</strong> Structured logging + métricas de latência</li>
                 {% else %}
-                <li><strong>Chain-of-Verification:</strong> Reduces LLM hallucinations via multi-step verification</li>
-                <li><strong>Hybrid Search:</strong> Combines semantic (embeddings) + lexical (BM25) search</li>
-                <li><strong>Deduplication:</strong> SHA-256 hash prevents duplicate documents</li>
-                <li><strong>Rate Limiting:</strong> 15 queries/IP/month (abuse protection)</li>
-                <li><strong>Multi-provider LLM:</strong> Fallback chain Groq → Perplexity → OpenAI</li>
-                <li><strong>Observability:</strong> Structured logging + latency metrics</li>
+                <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-default);"><strong>Chain-of-Verification:</strong> Reduces LLM hallucinations via multi-step verification</li>
+                <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-default);"><strong>Hybrid Search:</strong> Combines semantic (embeddings) + lexical (BM25) search</li>
+                <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-default);"><strong>Deduplication:</strong> SHA-256 hash prevents duplicate documents</li>
+                <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-default);"><strong>Rate Limiting:</strong> 15 queries/IP/month (abuse protection)</li>
+                <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-default);"><strong>Multi-provider LLM:</strong> Fallback chain Groq → Perplexity → OpenAI</li>
+                <li style="padding: var(--space-3) 0;"><strong>Observability:</strong> Structured logging + latency metrics</li>
                 {% endif %}
             </ul>
-        </div>
 
-        <!-- Architecture Decision Record (ADR) Reference -->
-        <div class="adr-reference">
-            {% if lang == 'pt-BR' %}
-            📋 <strong>Decisões Arquiteturais:</strong> Veja
-            <a href="https://github.com/kaioH3/kaio-portfolio/blob/main/MIGRATION.md" target="_blank">MIGRATION.md</a>
-            para análise completa de trade-offs (latência vs RAM, custos, quotas)
-            {% else %}
-            📋 <strong>Architecture Decisions:</strong> See
-            <a href="https://github.com/kaioH3/kaio-portfolio/blob/main/MIGRATION.md" target="_blank">MIGRATION.md</a>
-            for full trade-off analysis (latency vs RAM, costs, quotas)
-            {% endif %}
+            <!-- Architecture Decision Record -->
+            <div style="margin-top: var(--space-8); padding: var(--space-4); background: rgba(33, 150, 243, 0.05); border: 1px solid rgba(33, 150, 243, 0.2); border-radius: var(--radius-md); text-align: center;">
+                {% if lang == 'pt-BR' %}
+                <strong>Decisões Arquiteturais:</strong> Veja
+                <a href="https://github.com/kaioH3/kaio-portfolio/blob/main/MIGRATION.md" target="_blank" style="color: var(--brand-primary);">MIGRATION.md</a>
+                para análise completa de trade-offs (latência vs RAM, custos, quotas)
+                {% else %}
+                <strong>Architecture Decisions:</strong> See
+                <a href="https://github.com/kaioH3/kaio-portfolio/blob/main/MIGRATION.md" target="_blank" style="color: var(--brand-primary);">MIGRATION.md</a>
+                for full trade-off analysis (latency vs RAM, costs, quotas)
+                {% endif %}
+            </div>
         </div>
     </div>
 </section>
 {% endblock %}
 
-{% block extra_js %}
-  <script src="https://unpkg.com/htmx.org@2.0.0"
-          integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfEuxLgeHcEbjUUA5i9V5ZkpCw"
-          crossorigin="anonymous"></script>
-{% endblock %}
+{% block extra_js %}{% endblock %}

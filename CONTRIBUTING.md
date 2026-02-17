@@ -1,12 +1,12 @@
 # Contributing to Kaio Portfolio
 
-Obrigado por considerar contribuir! 🎉
+Obrigado por considerar contribuir!
 
-## 📋 Código de Conduta
+## Código de Conduta
 
 Este projeto segue o [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/). Ao participar, você deve seguir este código.
 
-## 🚀 Como Contribuir
+## Como Contribuir
 
 ### Reportar Bugs
 
@@ -71,7 +71,7 @@ Antes de criar uma issue:
 
 9. **Abra um Pull Request** no GitHub
 
-## 📝 Convenções de Código
+## Convenções de Código
 
 ### Python Style
 
@@ -188,7 +188,7 @@ def test_predict_low_risk():
     assert result["decision"] == "approved"
 ```
 
-## 🔧 Desenvolvimento
+## Desenvolvimento
 
 ### Setup Completo
 
@@ -228,18 +228,18 @@ pytest -m "not slow"
 python -m cProfile -o profile.stats app/main.py
 ```
 
-## 📚 Recursos
+## Recursos
 
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [Pydantic V2 Documentation](https://docs.pydantic.dev/latest/)
 - [XGBoost Documentation](https://xgboost.readthedocs.io/)
 - [HTMX Documentation](https://htmx.org/docs/)
 
-## ❓ Dúvidas?
+## Dúvidas?
 
 - Abra uma [Discussion](https://github.com/KaioH3/kaio-portfolio/discussions)
 - Entre em contato: contato@kaio.ia.br
 
 ---
 
-**Obrigado por contribuir! 🚀**
+**Obrigado por contribuir!**

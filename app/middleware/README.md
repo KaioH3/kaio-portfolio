@@ -72,7 +72,7 @@ def embed_documents(texts):
 
 ### Thread Safety
 
-✅ Thread-safe com `threading.Lock`
+Thread-safe com `threading.Lock`
 
 ### API
 
@@ -230,18 +230,18 @@ pytest tests/test_rate_limiting*.py -v
 
 ### Cobertura
 
-- ✅ Rate limiting funciona (permite até limite, bloqueia depois)
-- ✅ Reset automático após 1 hora
-- ✅ Thread safety (concurrent access)
-- ✅ Quota tracking persiste entre restarts
-- ✅ Dashboard retorna dados corretos
-- ✅ Error handling (arquivo corrompido, etc)
+- Rate limiting funciona (permite até limite, bloqueia depois)
+- Reset automático após 1 hora
+- Thread safety (concurrent access)
+- Quota tracking persiste entre restarts
+- Dashboard retorna dados corretos
+- Error handling (arquivo corrompido, etc)
 
 ---
 
 ## Benefícios para Recrutadores
 
-### 🎯 Demonstra
+### Demonstra
 
 1. **Arquitetura Defensiva**
    - Proteção em múltiplas camadas

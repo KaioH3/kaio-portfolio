@@ -1,14 +1,14 @@
-# 🚀 Deployment Guide - Kaio Portfolio
+# Deployment Guide - Kaio Portfolio
 
 Production deployment with Podman + Caddy + SSL
 
-## 📋 Prerequisites
+## Prerequisites
 
 - VPS com Podman instalado (Hetzner CX22 ou similar)
 - Domínio configurado (kaio.ia.br)
 - API Keys configuradas (Groq, Voyage AI, Qdrant Cloud)
 
-## 🔧 Quick Start
+## Quick Start
 
 ### 1. Build & Test Locally
 
@@ -30,7 +30,7 @@ curl http://localhost:8000/api/health
 ./scripts/deploy.sh
 ```
 
-## 📦 Container Details
+## Container Details
 
 ### Image Info
 - **Base**: python:3.11-slim
@@ -61,7 +61,7 @@ PROMETHEUS_ENABLED=true
 RATE_LIMIT_MONTHLY=15
 ```
 
-## 🔐 Production Setup (VPS)
+## Production Setup (VPS)
 
 ### 1. Prepare VPS
 
@@ -175,7 +175,7 @@ CNAME | landing        | kaio.ia.br         | 3600
 CNAME | api            | kaio.ia.br         | 3600
 ```
 
-## 🔍 Monitoring
+## Monitoring
 
 ### Check Container Status
 
@@ -206,7 +206,7 @@ curl https://kaio.ia.br/admin/quotas | jq .
 curl https://kaio.ia.br/metrics
 ```
 
-## 🔄 Updates
+## Updates
 
 ### Deploy New Version
 
@@ -227,7 +227,7 @@ podman images | grep kaio-portfolio
 podman run -d --name kaio-portfolio-api <previous-image-id>
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Container won't start
 
@@ -265,7 +265,7 @@ curl -vI https://kaio.ia.br
 caddy reload --force
 ```
 
-## 📊 Performance
+## Performance
 
 ### Expected Metrics
 
@@ -281,7 +281,7 @@ caddy reload --force
 3. **CDN**: Serve static files from CDN
 4. **Database**: Move from files to PostgreSQL for scaling
 
-## 🔐 Security Checklist
+## Security Checklist
 
 - [x] Non-root container user
 - [x] HTTPS with automatic SSL (Caddy)
@@ -296,7 +296,7 @@ caddy reload --force
 - [ ] Fail2ban for SSH
 - [ ] Regular updates
 
-## 📚 References
+## References
 
 - [Podman Documentation](https://docs.podman.io/)
 - [Caddy Documentation](https://caddyserver.com/docs/)

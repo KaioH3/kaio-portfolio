@@ -1,17 +1,17 @@
-# 🚀 Guia Completo de Deploy - Hetzner VPS
+# Guia Completo de Deploy - Hetzner VPS
 
 Deploy automatizado do Portfolio ML na Hetzner com Podman + Caddy + SSL automático.
 
-## 📋 Pré-requisitos
+## Pré-requisitos
 
 ### 1. VPS Hetzner
 
 Recomendado: **CX22** (2 vCPU, 4GB RAM, 40GB SSD) - ~€5.83/mês
 
-- ✅ CPU: 2 cores (necessário para XGBoost training)
-- ✅ RAM: 4GB (mínimo 2GB)
-- ✅ Storage: 40GB (datasets + models)
-- ✅ OS: Ubuntu 22.04 LTS
+- CPU: 2 cores (necessário para XGBoost training)
+- RAM: 4GB (mínimo 2GB)
+- Storage: 40GB (datasets + models)
+- OS: Ubuntu 22.04 LTS
 
 ### 2. Domínio Configurado
 
@@ -27,7 +27,7 @@ Recomendado: **CX22** (2 vCPU, 4GB RAM, 40GB SSD) - ~€5.83/mês
 
 ---
 
-## 🔧 Passo 1: Configurar VPS
+## Passo 1: Configurar VPS
 
 ### 1.1 Criar VPS na Hetzner
 
@@ -91,7 +91,7 @@ python3 --version   # 3.10+
 
 ---
 
-## 🔐 Passo 2: Configurar Segurança
+## Passo 2: Configurar Segurança
 
 ### 2.1 Firewall (UFW)
 
@@ -141,7 +141,7 @@ ssh deploy@<IP_VPS>
 
 ---
 
-## 📦 Passo 3: Deploy da Aplicação
+## Passo 3: Deploy da Aplicação
 
 ### 3.1 Clone do Repositório
 
@@ -267,7 +267,7 @@ curl http://localhost:8000/api/health
 
 ---
 
-## 🌐 Passo 4: Configurar Caddy (Reverse Proxy + SSL)
+## Passo 4: Configurar Caddy (Reverse Proxy + SSL)
 
 ### 4.1 Instalar Caddy
 
@@ -376,11 +376,11 @@ curl -I https://kaio.ia.br
 # Deve retornar HTTP/2 200
 ```
 
-Acesse no navegador: **https://kaio.ia.br** 🎉
+Acesse no navegador: **https://kaio.ia.br**
 
 ---
 
-## 🔍 Passo 5: Monitoring e Manutenção
+## Passo 5: Monitoring e Manutenção
 
 ### 5.1 Verificar Status dos Serviços
 
@@ -456,7 +456,7 @@ sudo systemctl status kaio-portfolio
 
 ---
 
-## 🔄 Atualizações e Deploy
+## Atualizações e Deploy
 
 ### Método 1: Script Automatizado
 
@@ -502,7 +502,7 @@ curl http://localhost:8000/api/health
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Container não inicia
 
@@ -560,7 +560,7 @@ sudo chcon -Rt svirt_sandbox_file_t /opt/kaio-portfolio/data
 
 ---
 
-## 📊 Backup e Restore
+## Backup e Restore
 
 ### Backup
 
@@ -586,7 +586,7 @@ podman restart kaio-portfolio-api
 
 ---
 
-## 📈 Próximos Passos
+## Próximos Passos
 
 - [ ] Configurar Prometheus + Grafana para dashboards
 - [ ] Setup de backups automáticos (cron + rclone para S3)
@@ -597,7 +597,7 @@ podman restart kaio-portfolio-api
 
 ---
 
-## 💬 Suporte
+## Suporte
 
 Se encontrar problemas:
 
@@ -607,6 +607,6 @@ Se encontrar problemas:
 
 ---
 
-**🎉 Parabéns! Seu portfolio ML está em produção!**
+**Parabéns! Seu portfolio ML está em produção!**
 
 Acesse: **https://kaio.ia.br**

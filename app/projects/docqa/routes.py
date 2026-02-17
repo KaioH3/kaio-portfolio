@@ -3,6 +3,7 @@ from fastapi import APIRouter, UploadFile, File, Request, HTTPException, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
+from typing import Optional
 import time
 import logging
 import tempfile
@@ -78,11 +79,12 @@ async def upload_document(request: Request, file: UploadFile = File(...)):
             emb_service = get_embedding_service()
             embeddings = emb_service.embed_documents(chunks)
             vs.add_documents(chunks, embeddings, metadatas)
-            
+
             elapsed = (time.time() - start) * 1000
-            
+
             return f'''<div class="result success">
                 {t("upload_success", lang, filename=file.filename, chunks=len(chunks), time_ms=elapsed)}
+                <input type="hidden" id="active-document-id" name="document_id" value="{doc_id}">
             </div>'''
         
         finally:
@@ -98,7 +100,8 @@ async def query_documents(
     request: Request,
     question: str = Form(...),
     enable_verification: str = Form("false"),
-    top_k: int = Form(5)
+    top_k: int = Form(5),
+    document_id: Optional[str] = Form(None),
 ):
     """Query documents - HTMX endpoint"""
     start = time.time()
@@ -113,7 +116,8 @@ async def query_documents(
 
     try:
         retrieval = get_retrieval_service()
-        chunks = await retrieval.retrieve(question, top_k=top_k)
+        filter_dict = {"document_id": document_id} if document_id else None
+        chunks = await retrieval.retrieve(question, top_k=top_k, filter_dict=filter_dict)
         
         if not chunks:
             return f'<div class="result">{t("query_no_documents", lang)}</div>'

@@ -76,11 +76,11 @@ class ModelTrainer:
         # Validar AUC mínimo
         if metrics['auc_roc'] < self.config.MIN_AUC_THRESHOLD:
             logger.warning(
-                f"⚠️  AUC ({metrics['auc_roc']:.4f}) abaixo do threshold "
+                f"AUC ({metrics['auc_roc']:.4f}) abaixo do threshold "
                 f"({self.config.MIN_AUC_THRESHOLD})"
             )
         else:
-            logger.info(f"✅ AUC ({metrics['auc_roc']:.4f}) acima do threshold!")
+            logger.info(f"AUC ({metrics['auc_roc']:.4f}) acima do threshold!")
 
         # Salvar modelo e artefatos
         if save_model:
@@ -144,7 +144,7 @@ class ModelTrainer:
             verbose=False
         )
 
-        logger.info(f"✅ Modelo treinado com {model.n_estimators} árvores")
+        logger.info(f"Modelo treinado com {model.n_estimators} árvores")
 
         # Feature importance
         feature_importance = pd.DataFrame({
@@ -177,7 +177,7 @@ class ModelTrainer:
         }
 
         # Log métricas
-        logger.info("\n📊 Métricas do Modelo:")
+        logger.info("\nMétricas do Modelo:")
         logger.info(f"  AUC-ROC:   {metrics['auc_roc']:.4f}")
         logger.info(f"  Accuracy:  {metrics['accuracy']:.4f}")
         logger.info(f"  Precision: {metrics['precision']:.4f}")
@@ -186,12 +186,12 @@ class ModelTrainer:
 
         # Confusion Matrix
         cm = confusion_matrix(y_test, y_pred)
-        logger.info("\n📈 Confusion Matrix:")
+        logger.info("\nConfusion Matrix:")
         logger.info(f"  TN: {cm[0][0]:,} | FP: {cm[0][1]:,}")
         logger.info(f"  FN: {cm[1][0]:,} | TP: {cm[1][1]:,}")
 
         # Classification Report
-        logger.info("\n📋 Classification Report:")
+        logger.info("\nClassification Report:")
         logger.info("\n" + classification_report(y_test, y_pred, target_names=['Rejected', 'Approved']))
 
         return metrics
@@ -202,7 +202,7 @@ class ModelTrainer:
         model_path.parent.mkdir(parents=True, exist_ok=True)
 
         joblib.dump(self.model, model_path)
-        logger.info(f"✅ Modelo salvo em: {model_path}")
+        logger.info(f"Modelo salvo em: {model_path}")
 
     def _save_metrics(self, metrics: Dict[str, Any]) -> None:
         """Salva métricas em JSON"""
@@ -222,7 +222,7 @@ class ModelTrainer:
         with open(metrics_path, 'w') as f:
             json.dump(metrics_with_timestamp, f, indent=2)
 
-        logger.info(f"✅ Métricas salvas em: {metrics_path}")
+        logger.info(f"Métricas salvas em: {metrics_path}")
 
 
 def main():
@@ -245,8 +245,8 @@ def main():
     metrics = trainer.train(save_model=True)
 
     print("\n" + "=" * 60)
-    print("✅ Treinamento concluído com sucesso!")
-    print(f"📊 AUC-ROC: {metrics['auc_roc']:.4f}")
+    print("Treinamento concluído com sucesso!")
+    print(f"AUC-ROC: {metrics['auc_roc']:.4f}")
     print("=" * 60)
 
 

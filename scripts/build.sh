@@ -5,7 +5,7 @@
 
 set -e  # Exit on error
 
-echo "🔨 Building Kaio Portfolio Container..."
+echo "Building Kaio Portfolio Container..."
 echo ""
 
 # Build image with Podman
@@ -17,7 +17,7 @@ podman build \
   .
 
 echo ""
-echo "✅ Build complete!"
+echo "Build complete!"
 echo ""
 echo "Image tags:"
 podman images | grep kaio-portfolio | head -5

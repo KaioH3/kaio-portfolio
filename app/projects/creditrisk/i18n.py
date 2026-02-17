@@ -82,6 +82,10 @@ TRANSLATIONS: Dict[str, Dict[Language, str]] = {
         "pt-BR": "Dias de Emprego (negativo):",
         "en-US": "Employment Days (negative):"
     },
+    "employment_days_help": {
+        "pt-BR": "Formato: negativo (ex: -1095 = 3 anos)",
+        "en-US": "Format: negative (e.g., -1095 = 3 years)"
+    },
     "field_education": {
         "pt-BR": "Nível Educacional:",
         "en-US": "Education Level:"

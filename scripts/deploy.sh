@@ -1,6 +1,6 @@
 #!/bin/bash
 # ══════════════════════════════════════════════════════════════════════════════
-# 🚀 Deploy Script - Kaio Portfolio
+# Deploy Script - Kaio Portfolio
 # Automatiza deploy via SSH para Hetzner VPS
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -29,19 +29,19 @@ NC='\033[0m' # No Color
 # ──────────────────────────────────────────────────────────────────────────────
 
 log_info() {
-    echo -e "${BLUE}ℹ ${NC}$1"
+    echo -e "${BLUE}[INFO]${NC} $1"
 }
 
 log_success() {
-    echo -e "${GREEN}✓${NC} $1"
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
 log_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
+    echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
 log_error() {
-    echo -e "${RED}✗${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1"
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -195,9 +195,9 @@ echo -e "${GREEN}🎉 DEPLOY CONCLUÍDO COM SUCESSO!${NC}"
 echo "════════════════════════════════════════════════════════════════════════"
 echo ""
 echo "  🌐 Portfolio:   https://${REMOTE_HOST}"
-echo "  📊 Health:      https://${REMOTE_HOST}/api/health"
-echo "  📈 Metrics:     https://${REMOTE_HOST}/metrics"
-echo "  🔧 Admin:       https://${REMOTE_HOST}/admin/quotas"
+echo "  Health:      https://${REMOTE_HOST}/api/health"
+echo "  Metrics:     https://${REMOTE_HOST}/metrics"
+echo "  Admin:       https://${REMOTE_HOST}/admin/quotas"
 echo ""
 echo "Comandos úteis:"
 echo "  ssh ${REMOTE_USER}@${REMOTE_HOST} 'podman logs -f kaio-portfolio-api'"

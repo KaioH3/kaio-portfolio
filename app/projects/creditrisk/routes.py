@@ -20,6 +20,28 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/credit-risk", tags=["Credit Risk"])
 
+# Lista de occupation types do dataset Kaggle
+OCCUPATION_TYPES = [
+    "Accountants",
+    "Cleaning staff",
+    "Core staff",
+    "Drivers",
+    "High skill tech staff",
+    "IT staff",
+    "Laborers",
+    "Low-skill Laborers",
+    "Managers",
+    "Medicine staff",
+    "Private service staff",
+    "Realty agents",
+    "Sales staff",
+    "Secretaries",
+    "Security staff",
+    "Technicians",
+    "Waiters/barmen staff",
+    "Unknown"
+]
+
 # Templates com fallback para base
 templates = Jinja2Templates(
     directory=[
@@ -49,6 +71,7 @@ async def credit_risk_index(request: Request):
         "housing_types": [h.value for h in HousingType],
         "income_types": [i.value for i in IncomeType],
         "family_statuses": [f.value for f in FamilyStatus],
+        "occupation_types": OCCUPATION_TYPES,
     }
 
     return templates.TemplateResponse("creditrisk_index.html", context)

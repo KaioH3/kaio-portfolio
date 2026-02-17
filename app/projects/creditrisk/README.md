@@ -2,7 +2,7 @@
 
 Sistema de scoring de crédito production-ready usando **XGBoost + SHAP** para análise de risco com explicabilidade.
 
-##  Características
+## Características
 
 - **Dataset Real**: 97k+ aplicações do Kaggle (Credit Card Approval Prediction)
 - **Modelo**: XGBoost Classifier com AUC-ROC > 0.75
@@ -11,7 +11,7 @@ Sistema de scoring de crédito production-ready usando **XGBoost + SHAP** para a
 - **i18n**: Suporte PT-BR e EN-US
 - **Segurança**: Validação Pydantic, sanitização de inputs, type safety
 
-##  Arquitetura
+## Arquitetura
 
 ```
 app/projects/creditrisk/
@@ -30,7 +30,7 @@ app/projects/creditrisk/
      creditrisk.css           # Estilos customizados
 ```
 
-##  Setup
+## Setup
 
 ### 1. Instalar Dependências
 
@@ -97,7 +97,7 @@ Acesse:
 - **Docs**: http://localhost:8000/docs (se ENV=development)
 - **Health**: http://localhost:8000/credit-risk/health
 
-##  Uso
+## Uso
 
 ### Interface Web (HTMX)
 
@@ -153,7 +153,7 @@ curl -X POST http://localhost:8000/credit-risk/api/score \
 }
 ```
 
-## 🧪 Testes
+## Testes
 
 ```bash
 # Testes básicos
@@ -217,7 +217,7 @@ http://localhost:8000/credit-risk/?lang=en-US
 
 MIT License - Use livremente para portfolio e projetos comerciais.
 
-## ‍ Autor
+## Autor
 
 **Kaio H. Siqueira** - ML Engineer
 Portfolio: https://github.com/kaioH3
