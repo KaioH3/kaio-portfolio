@@ -1,402 +1,287 @@
-# ML Engineer Portfolio
+# Kaio H. Siqueira — ML Engineer Portfolio
 
 <div align="center">
 
-**Production-ready Machine Learning Engineering Portfolio**
+**Two production ML systems. Zero cloud bill. Real engineering decisions.**
 
-Portfolio profissional demonstrando arquitetura ML escalável, trade-offs de engenharia e deploy production-ready.
+[![Live Demo](https://img.shields.io/badge/Live_Demo-kaio.ia.br-22c55e?style=for-the-badge)](https://kaio.ia.br)
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Podman](https://img.shields.io/badge/Podman-rootless-892CA0?logo=podman&logoColor=white)](https://podman.io/)
+[![Security](https://img.shields.io/badge/Security-OWASP-green)](app/middleware/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Podman](https://img.shields.io/badge/Podman-892CA0?logo=podman&logoColor=white)](https://podman.io/)
-[![Security](https://img.shields.io/badge/Security-OWASP-green)](app/middleware/security.py)
 
-[Documentação](#documentação) •
-[Deploy](#deploy) •
-[Testes](#testes) •
-[Contato](#contato)
+**[Live Demo](https://kaio.ia.br)** · [Doc QA](#1-doc-qa--rag-document-assistant) · [Credit Risk](#2-credit-risk-scoring-api) · [Quick Start](#quick-start) · [Deployment](DEPLOYMENT.md)
 
 </div>
 
 ---
 
-## Destaques
+## Why this project?
 
-- **Zero custo operacional** até escala (R$530/mês → R$0/mês via free tiers)
-- **Production-ready security** (OWASP Top 10, rate limiting, CORS, CSP)
-- **Explicabilidade** (SHAP values para compliance regulatório)
-- **i18n completo** (PT-BR/EN-US em todos os projetos)
-- **Deploy automatizado** (Podman + Caddy + SSL automático)
-- **Observabilidade** (Prometheus metrics, structured logging)
-- **100% type annotated** (mypy strict mode)
+Most ML portfolios are notebooks with clean datasets. This one is a FastAPI monorepo serving two ML systems — a RAG pipeline and a credit risk classifier — that run together in production on a 2GB VPS for $0/month. Every architectural decision (Voyage AI over local embeddings, HTMX over React, Qdrant Cloud over in-memory) is a deliberate trade-off between latency, RAM, and operational cost, not a default choice. The goal was to answer: *can you build something a fintech or AI startup would actually ship?*
 
-## Projetos
+---
 
-### 1. Doc QA - Intelligent Document Assistant
+## Key Metrics
 
-> Sistema de Retrieval-Augmented Generation com Chain-of-Verification para reduzir alucinações em 80%
+| System | Metric | Value |
+|--------|--------|-------|
+| **Doc QA** | End-to-end latency (p50) | ~280ms |
+| **Doc QA** | End-to-end latency (p99) | ~450ms |
+| **Doc QA** | Hallucination rate (CoVe) | ~2% (vs ~10% baseline) |
+| **Doc QA** | RAM usage | ~150MB (API embeddings, no local model) |
+| **Credit Risk** | AUC-ROC | >0.75 (97k applications) |
+| **Credit Risk** | Inference latency (p95) | <100ms |
+| **Credit Risk** | SHAP explanation features | Top 5 per prediction |
+| **Both** | Monthly infrastructure cost | $0 (free tiers) |
 
-**Objetivo**: Demonstrar trade-offs inteligentes de engenharia
-**Economia**: R$530/mês → R$0/mês (100% free tier)
-**Stack**: FastEmbed (local), Qdrant (embedded), Groq (free tier), HTMX
-**Endpoint**: `/doc-qa/`
+---
 
-**Features**:
-- Upload de PDFs/TXT com processamento assíncrono
-- Busca híbrida (semântica + BM25 reranking) +15% accuracy
-- Chain-of-Verification (-80% hallucinations)
-- Rate limiting inteligente (15 queries/mês por IP)
-- i18n (PT-BR/EN-US automático via Accept-Language)
+## Architecture
 
-**Performance**: 280ms p50, 450ms p99 | **Accuracy**: 95% vs OpenAI | **Hallucination**: 2%
+```mermaid
+graph LR
+    User --> Nginx
+    Nginx --> FastAPI
 
-[Documentação completa](app/projects/docqa/README.md)
+    FastAPI --> DocQA[Doc QA Service]
+    FastAPI --> CreditRisk[Credit Risk Service]
+
+    DocQA --> VoyageAI[Voyage AI\nEmbeddings API]
+    DocQA --> Qdrant[Qdrant Cloud\nVector DB]
+    DocQA --> Groq[Groq\nLlama 3.1 8B]
+
+    CreditRisk --> XGBoost[XGBoost\nLocal Model]
+    CreditRisk --> SHAP[SHAP\nExplainability]
+
+    style VoyageAI fill:#4f46e5,color:#fff
+    style Qdrant fill:#e11d48,color:#fff
+    style Groq fill:#059669,color:#fff
+    style XGBoost fill:#d97706,color:#fff
+```
+
+**Request flow**: Nginx (reverse proxy + TLS) → FastAPI → project service layer → external APIs or local ML model → HTMX partial response.
+
+---
+
+## Projects
+
+### 1. Doc QA — RAG Document Assistant
+
+Upload a PDF, ask questions, get cited answers with hallucination verification.
+
+**Stack**: Voyage AI (embeddings) → Qdrant Cloud (vector search) → Groq llama-3.1-8b → Chain-of-Verification
+
+| Feature | Implementation |
+|---------|---------------|
+| Chunking | 400 tokens, 50 overlap, SHA-256 deduplication |
+| Retrieval | Semantic search + BM25 reranking (hybrid) |
+| Verification | Chain-of-Verification: source citation + context grounding checks |
+| Rate limiting | 15 queries/IP/month, persisted to JSON |
+| Cost | $0/month — Voyage 200M lifetime tokens + Qdrant 1GB free + Groq free tier |
+
+[→ Full documentation](app/projects/docqa/)
 
 ---
 
 ### 2. Credit Risk Scoring API
 
-> Sistema de análise de risco de crédito com XGBoost + SHAP para explicabilidade regulatória
+Submit a loan application, get a risk score with SHAP-explained factors.
 
-**Objetivo**: Scoring interpretável para decisões de crédito
-**Dataset**: 430k applications (Kaggle - 97k downloads)
-**Stack**: XGBoost, SHAP, Scikit-learn, Pandas, HTMX
-**Endpoint**: `/credit-risk/`
+**Stack**: XGBoost trained on 97k Kaggle applications + SHAP TreeExplainer
 
-**Features**:
-- Predição de risco com 30+ features engineered
-- SHAP explanations (Shapley values) para compliance
-- API JSON + interface interativa HTMX
-- Pipeline completo de feature engineering
-- Testes com 100% coverage
+| Feature | Implementation |
+|---------|---------------|
+| Dataset | 430k applications, 97k after merge (Kaggle credit risk dataset) |
+| Features | 30+ engineered features (income ratios, employment stability, digital score) |
+| Explainability | SHAP Shapley values — top 5 features with direction per prediction |
+| Risk categories | LOW / MEDIUM / HIGH / VERY HIGH with confidence score |
+| Response | JSON API + interactive HTMX form, both i18n'd (PT-BR / EN-US) |
 
-**Métricas**: AUC-ROC > 0.75 | **Latência**: <100ms (p95) | **Throughput**: ~100 req/s
+[→ Full documentation](app/projects/creditrisk/)
 
-[Documentação completa](app/projects/creditrisk/README.md)
+---
 
-## Tech Stack
+## Technical Decisions
 
-**Backend**
-- FastAPI 0.115+ com validação Pydantic
-- Python 3.11 com type hints completos
-- Async/await para I/O operations
+These are the choices that aren't obvious, and why I made them.
 
-**ML/Data**
-- XGBoost para classificação
-- SHAP para explicabilidade
-- FastEmbed para embeddings (CPU-only)
-- Qdrant para vector search
+**Voyage AI instead of a local embedding model**
 
-**Frontend**
-- HTMX para interatividade (sem JS framework)
-- Jinja2 templates
-- FrontRender Design System (CSS puro)
+Local models (FastEmbed, sentence-transformers) require 400–700MB RAM and ~200ms CPU inference per query. On a 2GB VPS that also runs XGBoost, that's the entire memory budget. Voyage AI's API returns `voyage-3-lite` embeddings in ~50ms over HTTPS with 200M free lifetime tokens. For a portfolio serving intermittent traffic, the latency tradeoff is irrelevant and the RAM savings are critical.
 
-**DevOps**
-- Podman Compose (containers rootless)
-- Prometheus + Grafana (monitoring)
-- Caddy 2 (reverse proxy)
-- Systemd (process management)
+**HTMX instead of React / Next.js**
+
+This backend returns HTML fragments over HTTP. A React SPA would add 40–150KB of JavaScript, a build step, a Node runtime for SSR, and a separate API layer — none of which this project needs. HTMX adds 14KB and lets FastAPI return partial HTML directly. The result is the same user experience with 90% less frontend complexity and zero JavaScript framework to maintain.
+
+**Podman instead of Docker**
+
+Podman runs rootless by default. On a shared VPS, a process running as root inside Docker can escape to the host under certain conditions. Podman containers run as the unprivileged user, eliminating that attack surface. The API is compatible with Docker Compose files, so there's no migration cost.
+
+**Groq instead of OpenAI**
+
+Groq's free tier provides `llama-3.1-8b-instant` at ~300 tokens/second with no credit card. For a portfolio RAG system, the quality is sufficient and the cost is $0. The generation service has a fallback chain (Groq → Perplexity → OpenAI) for resilience.
+
+**FastAPI instead of Flask/Django**
+
+Async I/O matters when you're making 2–3 external API calls per request (embeddings, vector search, LLM). FastAPI's native async support means those calls run concurrently, not sequentially. Pydantic models give you free input validation and OpenAPI docs.
+
+---
 
 ## Quick Start
 
-### Pré-requisitos
-
-- **Python 3.11+**
-- **4GB+ RAM** (para XGBoost training)
-- **Conta Kaggle** (para dataset do Credit Risk)
-
-### Setup em 3 comandos
+**Requirements**: Python 3.11+, 2GB+ RAM, Kaggle account (for Credit Risk dataset)
 
 ```bash
-# 1. Clonar e preparar ambiente
+# 1. Clone and set up environment
 git clone https://github.com/KaioH3/kaio-portfolio.git
 cd kaio-portfolio
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
-# 2. Configurar API Keys (opcional - para Doc QA)
+# 2. Configure API keys
 cp .env.example .env
-# Edite .env com suas chaves: GROQ_API_KEY, VOYAGE_API_KEY, etc.
+# Edit .env — required for Doc QA: GROQ_API_KEY, VOYAGE_API_KEY, QDRANT_URL, QDRANT_API_KEY
 
-# 3. Setup e rodar servidor
-./scripts/setup.sh  # Download dataset + treina modelo (5-10min)
+# 3. Run
 uvicorn app.main:app --reload
+# → http://localhost:8000
 ```
 
-**Acesse**: `http://localhost:8000`
-
-### Configuração Kaggle (para Credit Risk)
+**Credit Risk model** (trains in ~3 minutes on CPU):
 
 ```bash
-# 1. Baixe kaggle.json em: https://www.kaggle.com/settings/account
-# 2. Configure credenciais
+# Download Kaggle dataset first
 mkdir -p ~/.kaggle
-mv ~/Downloads/kaggle.json ~/.kaggle/
-chmod 600 ~/.kaggle/kaggle.json
+mv ~/Downloads/kaggle.json ~/.kaggle/ && chmod 600 ~/.kaggle/kaggle.json
+
+# Train
+python -m app.projects.creditrisk.services.model_training
 ```
 
-## Estrutura do Projeto
+**Run tests**:
+
+```bash
+pytest                                       # all tests
+pytest tests/test_creditrisk.py -v          # credit risk
+pytest tests/test_rag_system.py -v          # doc qa
+```
+
+---
+
+## Project Structure
 
 ```
 kaio-portfolio/
 ├── app/
-│   ├── core/               # Config global, logging, utilities
-│   ├── middleware/         # Security (OWASP), rate limiting, quota tracking
-│   ├── routers/            # API routes (home, health, admin, i18n)
-│   └── projects/           # Projetos ML (arquitetura modular)
-│       ├── docqa/          # Doc QA - RAG com Chain-of-Verification
-│       ├── creditrisk/     # Credit Risk - XGBoost + SHAP
-│       └── landing/        # Landing page template
-├── data/                   # Datasets e modelos treinados (gitignored)
-├── tests/                  # Pytest suite (unit + integration)
-├── scripts/                # Automação (setup, build, deploy)
-├── static/                 # Assets (CSS, imagens, favicon)
-├── templates/              # Jinja2 templates base
-├── Containerfile           # Multi-stage Podman build
-├── podman-compose.yml      # Orquestração de containers
-├── DEPLOYMENT.md           # Guia completo de deploy
-└── CLAUDE.md               # Arquitetura e comandos dev
+│   ├── core/            # Global config, structured logging
+│   ├── middleware/      # OWASP security, rate limiting, quota tracking
+│   ├── routers/         # Home, health endpoints
+│   └── projects/
+│       ├── docqa/       # RAG pipeline (config, models, routes, services, templates)
+│       ├── creditrisk/  # XGBoost + SHAP (same pattern)
+│       └── landing/     # Portfolio landing page
+├── deploy/
+│   ├── systemd/         # Service unit template
+│   └── podman-compose.yml
+├── scripts/             # vps-setup.sh, vps-update.sh, build.sh
+├── static/              # CSS design system, HTMX
+├── templates/           # base.html
+├── Makefile             # make dev / make deploy VPS_HOST=...
+├── .env.example         # All required variables documented
+└── DEPLOYMENT.md        # VPS setup guide
 ```
 
-**Padrão de projeto ML** (`app/projects/<name>/`):
-- `config.py` - Pydantic Settings com singleton `@lru_cache`
-- `models.py` - Request/Response schemas
-- `routes.py` - FastAPI router (HTMX + JSON endpoints)
-- `i18n.py` - Traduções PT-BR/EN-US
-- `services/` - Business logic (singleton factories)
-- `templates/` - Jinja2 templates específicos
-- `static/` - CSS específico do projeto
+Each ML project follows the same pattern: `config.py` (Pydantic Settings) → `models.py` (schemas) → `routes.py` (FastAPI router) → `services/` (business logic, singletons) → `templates/` (Jinja2 + HTMX) → `i18n.py` (PT-BR/EN-US).
 
-## Testes
+---
 
-```bash
-# Todos os testes (unit + integration)
-pytest
+## Security
 
-# Com coverage report
-pytest --cov=app --cov-report=html --cov-report=term
+| Layer | Implementation |
+|-------|---------------|
+| Input validation | Pydantic strict schemas on all endpoints |
+| Rate limiting | Per-IP monthly quotas (Doc QA), per-hour API quotas (Qdrant, Groq) |
+| Headers | HSTS, CSP, X-Frame-Options, X-Content-Type-Options |
+| Container | Rootless Podman, `no-new-privileges`, `PrivateTmp`, `MemoryMax` |
+| Secrets | Environment variables only, never in logs or responses |
+| CORS | Explicit origin whitelist via `ALLOWED_ORIGINS` env var |
 
-# Testes específicos por projeto
-pytest tests/test_creditrisk.py -v           # Credit Risk
-pytest tests/test_rag_system.py -v           # Doc QA
-pytest tests/test_rate_limiting.py -v        # Rate limiting
-pytest tests/test_admin_dashboard.py -v      # Admin dashboard
+---
 
-# Apenas fast tests (skip slow training)
-pytest -m "not slow"
-```
+## Tech Stack
 
-**Coverage atual**: ~85% (target: 90%)
+| Layer | Technology | Why |
+|-------|-----------|-----|
+| API framework | FastAPI 0.115 | Native async, Pydantic validation, OpenAPI |
+| ML — classification | XGBoost + SHAP | Fast inference, compliance-ready explainability |
+| ML — embeddings | Voyage AI `voyage-3-lite` | Zero RAM, 200M free tokens |
+| Vector DB | Qdrant Cloud | 1GB free tier, payload filtering |
+| LLM | Groq `llama-3.1-8b-instant` | 300 tok/s, free tier, fallback chain |
+| Frontend | HTMX + Jinja2 | No build step, partial HTML updates |
+| CSS | Custom design system (3.48KB) | No framework dependency |
+| Container | Podman (rootless) | No daemon, no root |
+| Process | systemd | Auto-restart, resource limits |
+| Reverse proxy | Nginx | TLS termination, `client_max_body_size` |
 
-## Documentação
+---
 
-| Documento | Descrição |
-|-----------|-----------|
-| [CLAUDE.md](CLAUDE.md) | Arquitetura completa, comandos dev, convenções |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Guia passo-a-passo de deploy (Podman + Caddy + SSL) |
-| [MIGRATION.md](MIGRATION.md) | Migração ragsystem → docqa |
-| [Doc QA README](app/projects/docqa/README.md) | Trade-offs de engenharia, decisões técnicas |
-| [Credit Risk README](app/projects/creditrisk/README.md) | Pipeline ML, feature engineering |
-| [Middleware README](app/middleware/README.md) | Security, rate limiting, OWASP protection |
-| **Swagger UI** | `/docs` (apenas em development) |
-| **ReDoc** | `/redoc` (apenas em development) |
-
-## Segurança
-
-**OWASP Top 10 Protection**
-- SQL Injection: N/A (sem SQL direto, Pydantic validation)
-- XSS: Content-Security-Policy headers, HTML escaping
-- CSRF: SameSite cookies, CORS restrito
-- Sensitive Data: API keys via env vars, nunca em logs
-- Broken Access Control: Rate limiting, quota tracking
-
-**Application Security**
-- Input validation via Pydantic (strict schemas)
-- Enum-based sanitization para dados categóricos
-- IP-based rate limiting (15 queries/mês para Doc QA)
-- CORS configurável (whitelist de origins)
-- Security headers (HSTS, CSP, X-Frame-Options)
-
-**Container Security**
-- Rootless containers (user `appuser:1000`)
-- Read-only filesystem onde possível
-- Security options (`no-new-privileges`)
-- Resource limits (CPU/Memory)
-- Multi-stage build (menor surface attack)
-
-## Performance
-
-### Credit Risk API
-| Métrica | Valor |
-|---------|-------|
-| **Latência (p50)** | ~50ms |
-| **Latência (p95)** | <100ms |
-| **Latência (p99)** | <150ms |
-| **Throughput** | ~100 req/s (single core) |
-| **Memory** | ~500MB RAM |
-| **Model Size** | ~2MB (XGBoost compressed) |
-
-### Doc QA (RAG System)
-| Métrica | Valor |
-|---------|-------|
-| **Latência end-to-end (p50)** | ~280ms |
-| **Latência end-to-end (p99)** | ~450ms |
-| **LLM call** | ~150ms (Groq 300 tok/s) |
-| **Embedding** | ~50ms (CPU local) |
-| **Vector search** | ~30ms (Qdrant embedded) |
-| **Memory** | ~700MB (embedding model loaded) |
-| **Accuracy** | 95% (vs OpenAI: 100%) |
-| **Hallucination Rate** | 2% (vs standard RAG: 10%) |
-
-## Deploy
-
-### Local (Development)
-
-```bash
-# Build container local
-./scripts/build.sh
-
-# Run com Podman
-./scripts/run.sh
-
-# Verificar health
-curl http://localhost:8000/api/health
-```
-
-### Production (VPS)
-
-```bash
-# Deploy automatizado para Hetzner/Oracle Cloud
-./scripts/deploy.sh
-
-# Ou manual
-podman build -t kaio-portfolio:latest -f Containerfile .
-podman-compose -f podman-compose.yml up -d
-
-# Setup Caddy reverse proxy (SSL automático)
-# Ver DEPLOYMENT.md para guia completo
-```
-
-**Requisitos VPS**:
-- **RAM**: 2GB mínimo (4GB recomendado)
-- **CPU**: 2 cores
-- **Storage**: 10GB (datasets + models)
-- **OS**: Ubuntu 22.04+ ou Fedora 38+
-
-**Guia completo**: [DEPLOYMENT.md](DEPLOYMENT.md)
-
-## Princípios de Arquitetura
-
-1. **Cost-conscious scaling** - R$0/mês até validação de mercado (free tiers)
-2. **Measured trade-offs** - Cada decisão técnica tem métricas (latência, accuracy, cost)
-3. **Production-first** - Security, observability, error handling desde o início
-4. **Modular design** - Cada projeto ML é independente e self-contained
-5. **Type safety** - 100% type annotated, mypy strict mode
-6. **Testability** - Unit + integration tests, >85% coverage
-7. **Graceful degradation** - Fallback chains (Groq → Perplexity → Ollama)
-
-## Desenvolvido Com
-
-<table>
-<tr>
-<td><strong>Backend</strong></td>
-<td>
-FastAPI 0.115+ • Uvicorn • Pydantic 2.0 • Python 3.11
-</td>
-</tr>
-<tr>
-<td><strong>ML/Data</strong></td>
-<td>
-XGBoost • SHAP • Scikit-learn • Pandas • NumPy • FastEmbed
-</td>
-</tr>
-<tr>
-<td><strong>Vector/LLM</strong></td>
-<td>
-Qdrant (embedded) • Groq (free tier) • sentence-transformers
-</td>
-</tr>
-<tr>
-<td><strong>Frontend</strong></td>
-<td>
-HTMX (14KB) • Jinja2 • FrontRender CSS (3.48KB) • Semantic HTML
-</td>
-</tr>
-<tr>
-<td><strong>DevOps</strong></td>
-<td>
-Podman • Caddy 2 • Prometheus • Systemd • GitHub Actions
-</td>
-</tr>
-<tr>
-<td><strong>Qualidade</strong></td>
-<td>
-Pytest • Black • Mypy • Ruff • Pre-commit hooks
-</td>
-</tr>
-</table>
-
-## Por Que Este Portfolio?
-
-Este projeto demonstra:
-
-**Engenharia de ML além de notebooks** - Pipeline completo (data → training → serving → monitoring)
-**Trade-offs conscientes** - Decisões técnicas baseadas em métricas reais
-**Production-ready code** - Security, performance, observability, tests
-**Zero para produção** - Scripts automatizados de setup e deploy
-**Escalabilidade planejada** - Arquitetura que cresce de R$0/mês → enterprise
-
-**Não é apenas código - é uma demonstração de maturidade em ML Engineering.**
-
-## Roadmap
-
-- [ ] GitHub Actions CI/CD (pytest + build + deploy automático)
-- [ ] Grafana dashboard para métricas Prometheus
-- [ ] A/B testing framework para comparar modelos
-- [ ] Redis cache para embeddings (reduzir latência)
-- [ ] PostgreSQL migration (quotas + user data)
-- [ ] Kubernetes manifests (escala > 10k req/dia)
-- [ ] OpenTelemetry distributed tracing
-
-## Contribuindo
-
-Este é um portfolio pessoal, mas contribuições são bem-vindas!
-
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'feat: add AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-**Convenções**:
-- Commits seguem [Conventional Commits](https://www.conventionalcommits.org/)
-- Code style: Black + Ruff
-- Type hints obrigatórios
-- Testes para novas features
-
-## Licença
-
-Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
-
-## Contato
+## Contact
 
 **Kaio H. Siqueira**
-Backend Engineer → ML/AI | 12 anos de experiência
+Self-taught engineer, programming since age 14 · Linux-native since 16 · Production deployments since 2023
 
 [![GitHub](https://img.shields.io/badge/GitHub-KaioH3-181717?logo=github)](https://github.com/KaioH3)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-kaiohsiqueira-0A66C2?logo=linkedin)](https://www.linkedin.com/in/kaiohsiqueira/)
 [![Medium](https://img.shields.io/badge/Medium-@KaioH3-00ab6c?logo=medium)](https://medium.com/@KaioH3)
-[![Email](https://img.shields.io/badge/Email-contato-D14836?logo=gmail)](mailto:contato@kaio.ia.br)
+[![Email](https://img.shields.io/badge/Email-contato@kaio.ia.br-D14836?logo=gmail)](mailto:contato@kaio.ia.br)
 
 ---
 
-<div align="center">
+<details>
+<summary>Leia em Português</summary>
 
-**Se este projeto ajudou você, considere dar uma estrela!**
+## Portfólio ML Engineering — Kaio H. Siqueira
 
-Feito com Python
+Dois sistemas ML em produção. Zero custo de infraestrutura. Decisões de engenharia reais.
 
-</div>
+**[Demo ao vivo](https://kaio.ia.br)**
+
+### Por que este projeto?
+
+A maioria dos portfólios ML são notebooks com datasets limpos. Este é um monorepo FastAPI servindo dois sistemas ML — um pipeline RAG e um classificador de risco de crédito — que rodam juntos em produção em um VPS de 2GB por $0/mês. Cada decisão arquitetural (Voyage AI vs embeddings locais, HTMX vs React, Qdrant Cloud vs in-memory) é um trade-off deliberado entre latência, RAM e custo operacional.
+
+### Projetos
+
+**Doc QA** — Faça upload de um PDF, faça perguntas, receba respostas citadas com verificação de alucinações. Stack: Voyage AI → Qdrant Cloud → Groq llama-3.1-8b → Chain-of-Verification.
+
+**Credit Risk API** — Envie uma aplicação de crédito, receba score de risco com top 5 fatores explicados via SHAP. Modelo XGBoost treinado em 97k aplicações do Kaggle.
+
+### Decisões Técnicas
+
+- **Voyage AI em vez de modelo local**: modelos locais (FastEmbed) consomem 400-700MB RAM. No VPS de 2GB que também roda XGBoost, isso é impraticável. Voyage AI retorna embeddings em ~50ms via HTTPS com 200M tokens gratuitos vitalícios.
+- **HTMX em vez de React**: o backend retorna fragmentos HTML. React adicionaria 40-150KB de JavaScript, um passo de build e um runtime Node sem nenhum benefício real aqui.
+- **Podman em vez de Docker**: Podman roda rootless por padrão, eliminando a superfície de ataque de processos root em containers.
+- **Groq em vez de OpenAI**: tier gratuito com llama-3.1-8b-instant a ~300 tok/s, sem cartão de crédito. Cadeia de fallback: Groq → Perplexity → OpenAI.
+
+### Setup Rápido
+
+```bash
+git clone https://github.com/KaioH3/kaio-portfolio.git
+cd kaio-portfolio
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+# Preencher .env com: GROQ_API_KEY, VOYAGE_API_KEY, QDRANT_URL, QDRANT_API_KEY
+uvicorn app.main:app --reload
+```
+
+### Contato
+
+**Kaio H. Siqueira** — Engenheiro autodidata, programando desde os 14 anos · Linux desde os 16 · Deploys em produção desde 2023
+
+[GitHub](https://github.com/KaioH3) · [LinkedIn](https://www.linkedin.com/in/kaiohsiqueira/) · [contato@kaio.ia.br](mailto:contato@kaio.ia.br)
+
+</details>
