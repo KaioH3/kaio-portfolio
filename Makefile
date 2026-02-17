@@ -7,8 +7,10 @@
 
 .PHONY: help dev test lint deploy-setup deploy upload-model logs status ssh
 
-VPS_HOST ?= $(error Set VPS_HOST: e.g. make deploy VPS_HOST=user@ip)
-VPS_DIR  ?= ~/kaio-portfolio
+# IPv6 VPS: use bracket notation for scp, plain for ssh
+# Usage: make deploy VPS_HOST=user@ip VPS_HOST_BRACKET="user@[ip]"
+VPS_HOST         ?= $(error Set VPS_HOST: user@server-ip)
+VPS_HOST_BRACKET ?= $(error Set VPS_HOST_BRACKET: "user@[server-ip]")
 
 help:
 	@echo "Commands:"
@@ -33,24 +35,32 @@ lint:
 	source venv/bin/activate && ruff check app/ tests/ 2>/dev/null || echo "ruff not installed"
 
 # ── VPS Operations ────────────────────────────────────────────────────────────
-deploy-setup:
-	ssh $(VPS_HOST) 'bash -s' < scripts/vps-setup.sh
+# VPS is IPv6-only: deploy uses scp/ssh directly (no git pull on server)
 
 deploy:
-	ssh $(VPS_HOST) 'cd $(VPS_DIR) && bash scripts/vps-update.sh'
+	@echo "Syncing code to VPS..."
+	tar --exclude='venv' --exclude='.env' --exclude='__pycache__' \
+	    --exclude='*.pyc' --exclude='.git' --exclude='data' \
+	    --exclude='.pytest_cache' --exclude='.ruff_cache' \
+	    -czf /tmp/kaio-deploy.tar.gz .
+	scp -i ~/.ssh/id_rsa /tmp/kaio-deploy.tar.gz "$(VPS_HOST_BRACKET):/tmp/"
+	ssh -i ~/.ssh/id_rsa $(VPS_HOST) \
+	    'tar -xzf /tmp/kaio-deploy.tar.gz -C ~/kaio-portfolio && rm /tmp/kaio-deploy.tar.gz && cd ~/kaio-portfolio && podman-compose up -d --build'
+	rm /tmp/kaio-deploy.tar.gz
+	@echo "Deployed. Check: make status"
 
 upload-model:
-	@echo "Uploading Credit Risk model artifacts to $(VPS_HOST)..."
-	ssh $(VPS_HOST) 'mkdir -p $(VPS_DIR)/data/models'
-	scp data/models/credit_risk_model.joblib $(VPS_HOST):$(VPS_DIR)/data/models/
-	scp data/models/feature_engineering.joblib $(VPS_HOST):$(VPS_DIR)/data/models/
-	ssh $(VPS_HOST) 'sudo systemctl restart kaio-portfolio'
+	@echo "Uploading Credit Risk model to VPS..."
+	ssh -i ~/.ssh/id_rsa $(VPS_HOST) 'mkdir -p ~/kaio-portfolio/data/models'
+	scp -i ~/.ssh/id_rsa data/models/credit_risk_model.joblib "$(VPS_HOST_BRACKET):~/kaio-portfolio/data/models/"
+	scp -i ~/.ssh/id_rsa data/models/feature_engineering.joblib "$(VPS_HOST_BRACKET):~/kaio-portfolio/data/models/"
+	ssh -i ~/.ssh/id_rsa $(VPS_HOST) 'cd ~/kaio-portfolio && podman-compose restart'
 
 logs:
-	ssh $(VPS_HOST) 'journalctl -u kaio-portfolio -f'
+	ssh -i ~/.ssh/id_rsa $(VPS_HOST) 'podman logs kaio-api -f'
 
 status:
-	ssh $(VPS_HOST) 'systemctl status kaio-portfolio --no-pager'
+	ssh -i ~/.ssh/id_rsa $(VPS_HOST) 'podman ps && curl -s http://localhost:8000/api/health'
 
 ssh:
-	ssh $(VPS_HOST)
+	ssh -i ~/.ssh/id_rsa $(VPS_HOST)
