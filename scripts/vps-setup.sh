@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # VPS Initial Setup - Kaio Portfolio
-# Run ONCE on a fresh Hetzner VPS as aikadmin
+# Run ONCE on your VPS as your deploy user
 # Usage: bash vps-setup.sh
 set -euo pipefail
 
@@ -8,6 +8,7 @@ REPO_URL="git@github.com:KaioH3/kaio-portfolio.git"
 APP_DIR="$HOME/kaio-portfolio"
 SERVICE_NAME="kaio-portfolio"
 PYTHON_VERSION="3.11"
+VPS_USER="$(whoami)"   # uses the current user — no hardcoded names
 
 log()  { echo "[$(date '+%H:%M:%S')] $*"; }
 ok()   { echo "[$(date '+%H:%M:%S')] OK: $*"; }
@@ -135,7 +136,11 @@ fi
 
 # ── 9. Install systemd service ────────────────────────────────────────────────
 log "Installing systemd service..."
-sudo cp deploy/systemd/${SERVICE_NAME}.service /etc/systemd/system/
+# Fill in placeholders from the template (no credentials in repo)
+sed -e "s|__VPS_USER__|${VPS_USER}|g" \
+    -e "s|__APP_DIR__|${APP_DIR}|g" \
+    deploy/systemd/${SERVICE_NAME}.service \
+    | sudo tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null
 sudo systemctl daemon-reload
 sudo systemctl enable ${SERVICE_NAME}
 sudo systemctl start ${SERVICE_NAME}
