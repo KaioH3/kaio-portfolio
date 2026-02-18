@@ -26,6 +26,7 @@ class GenerationService:
     async def generate(
         self, query: str, context_chunks: List[RetrievedChunk],
         max_tokens: Optional[int] = None,
+        lang: str = "en-US",
     ) -> Dict[str, Any]:
         # Rate limit check BEFORE calling LLM
         limiter = get_global_rate_limiter()
@@ -35,7 +36,7 @@ class GenerationService:
                 detail="LLM rate limit exceeded. Try again in 1 hour."
             )
 
-        prompt = self._build_prompt(query, context_chunks)
+        prompt = self._build_prompt(query, context_chunks, lang)
         providers = self._get_provider_chain()
 
         last_error = None
@@ -63,30 +64,35 @@ class GenerationService:
             chain.append(("openai", self._generate_openai))
         return chain
 
-    def _build_prompt(self, query: str, chunks: List[RetrievedChunk]) -> str:
+    def _build_prompt(self, query: str, chunks: List[RetrievedChunk], lang: str = "en-US") -> str:
         ctx_parts = []
         for i, c in enumerate(chunks[:3], 1):
             src = f"{c.metadata.filename} (chunk {c.metadata.chunk_index})"
-            # Strip leading/trailing whitespace and limit to 500 chars
-            clean_text = " ".join(c.text.split())[:500]
+            clean_text = " ".join(c.text.split())[:400]
             ctx_parts.append(f"[{i}] {src}\n{clean_text}")
         ctx = "\n\n".join(ctx_parts)
 
-        return f"""You are a concise document assistant. Answer the question using ONLY the provided context.
+        if lang == "en-US":
+            lang_rule = "Write your answer in English."
+            no_info = "I don't have enough information in the document."
+        else:
+            lang_rule = "Escreva sua resposta em português."
+            no_info = "Não encontrei informação suficiente no documento."
 
-Rules:
-- Answer in 2-4 sentences maximum.
-- Do NOT repeat phrases or sentences.
-- Do NOT copy code blocks or lists verbatim.
-- Cite sources as [1], [2], [3].
-- If the answer is not in the context, say "I don't have enough information in the document."
-
-Context:
-{ctx}
-
-Question: {query}
-
-Answer (2-4 sentences):"""
+        return (
+            "You are a document assistant. Read the SOURCES below and answer the QUESTION.\n\n"
+            "RULES:\n"
+            f"1. {lang_rule}\n"
+            "2. Use 2-4 sentences only.\n"
+            "3. Cite sources as [1], [2], [3].\n"
+            "4. Do NOT copy code, commands, curly braces, or template text verbatim.\n"
+            "5. Summarize in your own words.\n"
+            f"6. If the answer is not in the sources, respond: \"{no_info}\"\n\n"
+            "SOURCES:\n"
+            f"{ctx}\n\n"
+            f"QUESTION: {query}\n\n"
+            "ANSWER:"
+        )
 
     async def _generate_groq(self, prompt: str, max_tokens: Optional[int]) -> Dict[str, Any]:
         """Groq FREE tier - llama-3.1-8b-instant"""

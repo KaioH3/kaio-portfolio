@@ -7,8 +7,12 @@ services:
       dockerfile: containerfiles/Containerfile.api
     container_name: kaio-api
     image: localhost/kaio-portfolio-api:latest
-    ports:
-      - "8000:8000"
+    # host network: container uses host DNS directly (required for IPv6-only VPS)
+    network_mode: host
+    # Explicit DNS fallback for Hetzner IPv6-only VPS (in case bridge mode is used)
+    dns:
+      - 2a01:4ff:ff00::add:1
+      - 2a01:4ff:ff00::add:2
     env_file:
       - .env
     environment:
@@ -30,7 +34,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
-networks:
-  default:
-    name: kaio-portfolio-net

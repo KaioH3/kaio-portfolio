@@ -20,7 +20,7 @@
 
 ## Why this project?
 
-Most ML portfolios are notebooks with clean datasets. This one is a FastAPI monorepo serving two ML systems — a RAG pipeline and a credit risk classifier — that run together in production on a 2GB VPS for $0/month. Every architectural decision (Voyage AI over local embeddings, HTMX over React, Qdrant Cloud over in-memory) is a deliberate trade-off between latency, RAM, and operational cost, not a default choice. The goal was to answer: *can you build something a fintech or AI startup would actually ship?*
+Most ML portfolios are notebooks with clean datasets. This one is a FastAPI monorepo serving two ML systems — a RAG pipeline and a credit risk classifier — that run together in production on a 4GB VPS for €3.29/month. Every architectural decision (Voyage AI over local embeddings, HTMX over React, Qdrant Cloud over in-memory) is a deliberate trade-off between latency, RAM, and operational cost, not a default choice. The goal was to answer: *can you build something a fintech or AI startup would actually ship?*
 
 ---
 
@@ -110,7 +110,7 @@ These are the choices that aren't obvious, and why I made them.
 
 **Voyage AI instead of a local embedding model**
 
-Local models (FastEmbed, sentence-transformers) require 400–700MB RAM and ~200ms CPU inference per query. On a 2GB VPS that also runs XGBoost, that's the entire memory budget. Voyage AI's API returns `voyage-3-lite` embeddings in ~50ms over HTTPS with 200M free lifetime tokens. For a portfolio serving intermittent traffic, the latency tradeoff is irrelevant and the RAM savings are critical.
+Local models (FastEmbed, sentence-transformers) require 400–700MB RAM and ~200ms CPU inference per query. On a 4GB VPS that also runs XGBoost, that's a significant portion of the memory budget. Voyage AI's API returns `voyage-3-lite` embeddings in ~50ms over HTTPS with 200M free lifetime tokens. For a portfolio serving intermittent traffic, the latency tradeoff is irrelevant and the RAM savings are critical.
 
 **HTMX instead of React / Next.js**
 
@@ -132,7 +132,7 @@ Async I/O matters when you're making 2–3 external API calls per request (embed
 
 ## Quick Start
 
-**Requirements**: Python 3.11+, 2GB+ RAM, Kaggle account (for Credit Risk dataset)
+**Requirements**: Python 3.11+, 4GB+ RAM, Kaggle account (for Credit Risk dataset)
 
 ```bash
 # 1. Clone and set up environment
@@ -251,7 +251,7 @@ Dois sistemas ML em produção. Zero custo de infraestrutura. Decisões de engen
 
 ### Por que este projeto?
 
-A maioria dos portfólios ML são notebooks com datasets limpos. Este é um monorepo FastAPI servindo dois sistemas ML — um pipeline RAG e um classificador de risco de crédito — que rodam juntos em produção em um VPS de 2GB por $0/mês. Cada decisão arquitetural (Voyage AI vs embeddings locais, HTMX vs React, Qdrant Cloud vs in-memory) é um trade-off deliberado entre latência, RAM e custo operacional.
+A maioria dos portfólios ML são notebooks com datasets limpos. Este é um monorepo FastAPI servindo dois sistemas ML — um pipeline RAG e um classificador de risco de crédito — que rodam juntos em produção em um VPS de 4GB por €3.29/mês. Cada decisão arquitetural (Voyage AI vs embeddings locais, HTMX vs React, Qdrant Cloud vs in-memory) é um trade-off deliberado entre latência, RAM e custo operacional.
 
 ### Projetos
 
@@ -261,7 +261,7 @@ A maioria dos portfólios ML são notebooks com datasets limpos. Este é um mono
 
 ### Decisões Técnicas
 
-- **Voyage AI em vez de modelo local**: modelos locais (FastEmbed) consomem 400-700MB RAM. No VPS de 2GB que também roda XGBoost, isso é impraticável. Voyage AI retorna embeddings em ~50ms via HTTPS com 200M tokens gratuitos vitalícios.
+- **Voyage AI em vez de modelo local**: modelos locais (FastEmbed) consomem 400-700MB RAM. No VPS de 4GB que também roda XGBoost, usar APIs externas libera memória preciosa. Voyage AI retorna embeddings em ~50ms via HTTPS com 200M tokens gratuitos vitalícios.
 - **HTMX em vez de React**: o backend retorna fragmentos HTML. React adicionaria 40-150KB de JavaScript, um passo de build e um runtime Node sem nenhum benefício real aqui.
 - **Podman em vez de Docker**: Podman roda rootless por padrão, eliminando a superfície de ataque de processos root em containers.
 - **Groq em vez de OpenAI**: tier gratuito com llama-3.1-8b-instant a ~300 tok/s, sem cartão de crédito. Cadeia de fallback: Groq → Perplexity → OpenAI.

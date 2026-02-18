@@ -199,6 +199,24 @@ TRANSLATIONS: Dict[str, Dict[Language, str]] = {
         "en-US": "SHAP explanations not available (install: pip install shap)"
     },
 
+    # === RECOMMENDATIONS ===
+    "action_low": {
+        "pt-BR": "Aprovação recomendada (confiança: {pct}%)",
+        "en-US": "Approval recommended (confidence: {pct}%)"
+    },
+    "action_medium": {
+        "pt-BR": "Análise manual recomendada (confiança: {pct}%)",
+        "en-US": "Manual review recommended (confidence: {pct}%)"
+    },
+    "action_high": {
+        "pt-BR": "Solicitar garantias adicionais (risco: {pct}%)",
+        "en-US": "Request additional guarantees (risk: {pct}%)"
+    },
+    "action_very_high": {
+        "pt-BR": "Rejeição recomendada (risco: {pct}%)",
+        "en-US": "Rejection recommended (risk: {pct}%)"
+    },
+
     # === ERRORS ===
     "error_title": {
         "pt-BR": "Erro",

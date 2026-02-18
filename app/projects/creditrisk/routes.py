@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Request, HTTPException, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from markupsafe import escape
 from pathlib import Path
 import time
 import logging
@@ -15,6 +16,7 @@ from .models import (
 from .services.risk_scoring import get_risk_scoring
 from .config import get_credit_risk_config
 from .i18n import t, get_language_from_request
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -145,13 +147,13 @@ async def score_htmx(
     except ValueError as e:
         # Erro de validação
         logger.warning(f"Validation error: {e}")
-        error_msg = t("error_invalid_input", lang, detail=str(e))
+        error_msg = t("error_invalid_input", lang, detail=escape(str(e)))
         return f'<div class="result error">{error_msg}</div>'
 
     except Exception as e:
         # Erro interno
         logger.error(f"Prediction error: {e}", exc_info=True)
-        error_msg = t("error_prediction", lang, error=str(e))
+        error_msg = t("error_prediction", lang, error=escape(str(e)))
         return f'<div class="result error">{error_msg}</div>'
 
 
@@ -177,7 +179,8 @@ async def score_api(application: LoanApplication) -> RiskPrediction:
 
     except Exception as e:
         logger.error(f"API prediction error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        detail = str(e) if settings.ENV == "development" else "Internal server error"
+        raise HTTPException(status_code=500, detail=detail)
 
 
 @router.get("/health", response_model=HealthCheck)
@@ -252,6 +255,20 @@ def _render_prediction_result(prediction: RiskPrediction, lang: str) -> str:
 
     risk_label = risk_translations.get(prediction.risk_category.value, prediction.risk_category.value)
 
+    # Traduzir recomendação com base na categoria e lang
+    approval_pct = f"{prediction.approval_probability * 100:.1f}"
+    rejection_pct = f"{(1 - prediction.approval_probability) * 100:.1f}"
+    cat = prediction.risk_category.value
+    if lang == "en-US":
+        recommendation_text = {
+            "low": f"Approval recommended (confidence: {approval_pct}%)",
+            "medium": f"Manual review recommended (confidence: {approval_pct}%)",
+            "high": f"Request additional guarantees (risk: {rejection_pct}%)",
+            "very_high": f"Rejection recommended (risk: {rejection_pct}%)",
+        }.get(cat, prediction.recommended_action)
+    else:
+        recommendation_text = prediction.recommended_action
+
     # CSS class baseada no risco
     risk_class = f"risk-{prediction.risk_category.value.replace('_', '-')}"
 
@@ -300,7 +317,7 @@ def _render_prediction_result(prediction: RiskPrediction, lang: str) -> str:
 
             <div class="result-item">
                 <label>{t("results_recommendation", lang)}</label>
-                <div class="recommendation">{prediction.recommended_action}</div>
+                <div class="recommendation">{recommendation_text}</div>
             </div>
 
             <div class="result-item">

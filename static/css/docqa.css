@@ -6,6 +6,12 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
+@keyframes progress-slide {
+  0%   { transform: translateX(-100%); width: 60%; }
+  50%  { transform: translateX(60%);  width: 60%; }
+  100% { transform: translateX(200%); width: 60%; }
+}
+
 /* ===== HERO BADGES CONTAINER ===== */
 .hero-badges {
   display: flex;

@@ -2,6 +2,7 @@
 from fastapi import APIRouter, UploadFile, File, Request, HTTPException, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from markupsafe import escape
 from pathlib import Path
 from typing import Optional
 import time
@@ -55,7 +56,7 @@ async def upload_document(request: Request, file: UploadFile = File(...)):
     try:
         ext = Path(file.filename).suffix.lower()
         if ext not in rag_config.ALLOWED_EXTENSIONS:
-            return f'<div class="result error">{t("upload_error_type", lang, ext=ext)}</div>'
+            return f'<div class="result error">{t("upload_error_type", lang, ext=escape(ext))}</div>'
         
         content = await file.read()
         max_bytes = rag_config.MAX_FILE_SIZE_MB * 1024 * 1024
@@ -83,8 +84,8 @@ async def upload_document(request: Request, file: UploadFile = File(...)):
             elapsed = (time.time() - start) * 1000
 
             return f'''<div class="result success">
-                {t("upload_success", lang, filename=file.filename, chunks=len(chunks), time_ms=elapsed)}
-                <input type="hidden" id="active-document-id" name="document_id" value="{doc_id}">
+                {t("upload_success", lang, filename=escape(file.filename), chunks=len(chunks), time_ms=elapsed)}
+                <input type="hidden" id="active-document-id" name="document_id" value="{escape(doc_id)}">
             </div>'''
         
         finally:
@@ -92,7 +93,7 @@ async def upload_document(request: Request, file: UploadFile = File(...)):
     
     except Exception as e:
         logger.error(f"Upload error: {e}")
-        return f'<div class="result error">{t("upload_error", lang, error=str(e))}</div>'
+        return f'<div class="result error">{t("upload_error", lang, error=escape(str(e)))}</div>'
 
 
 @router.post("/query", response_class=HTMLResponse)
@@ -123,7 +124,7 @@ async def query_documents(
             return f'<div class="result">{t("query_no_documents", lang)}</div>'
         
         gen = get_generation_service()
-        result = await gen.generate(question, chunks)
+        result = await gen.generate(question, chunks, lang=lang)
         remaining = limiter.increment(client_ip)
 
         verification_html = ""
@@ -137,10 +138,10 @@ async def query_documents(
             steps_html = "".join([
                 f'''<div class="verification-step">
                     {t("verification_step", lang,
-                       step=s.step,
+                       step=escape(s.step),
                        status=t("verification_passed" if s.passed else "verification_failed", lang),
                        confidence=s.confidence)}
-                    <br><small>{s.details}</small>
+                    <br><small>{escape(s.details)}</small>
                 </div>'''
                 for s in steps
             ])
@@ -152,7 +153,7 @@ async def query_documents(
         
         sources_html = "".join([
             f'''<div class="source">
-                [{i+1}] <strong>{c.metadata.filename}</strong>
+                [{i+1}] <strong>{escape(c.metadata.filename)}</strong>
                 (p. {c.metadata.page_number}, chunk {c.metadata.chunk_index}/{c.metadata.total_chunks})
                 <br><small>Score: {c.score:.3f}</small>
             </div>'''
@@ -163,7 +164,7 @@ async def query_documents(
         
         return f'''<div class="result answer">
             <h3>{t("query_answer_title", lang)}</h3>
-            <p>{result["answer"]}</p>
+            <p>{escape(result["answer"])}</p>
             
             <h3>{t("query_sources_title", lang)}</h3>
             <div class="sources">{sources_html}</div>
@@ -183,7 +184,7 @@ async def query_documents(
     
     except Exception as e:
         logger.error(f"Query error: {e}")
-        return f'<div class="result error">{t("query_error", lang, error=str(e))}</div>'
+        return f'<div class="result error">{t("query_error", lang, error=escape(str(e)))}</div>'
 
 
 @router.get("/health", response_model=HealthCheck)

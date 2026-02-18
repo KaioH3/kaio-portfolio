@@ -44,6 +44,14 @@ TRANSLATIONS: Dict[str, Dict[Language, str]] = {
         "pt-BR": "Selecione um arquivo (PDF, TXT, MD):",
         "en-US": "Select a file (PDF, TXT, MD):"
     },
+    "upload_choose_file": {
+        "pt-BR": "Escolher arquivo",
+        "en-US": "Choose file"
+    },
+    "upload_no_file": {
+        "pt-BR": "Nenhum arquivo selecionado",
+        "en-US": "No file selected"
+    },
     "upload_button": {
         "pt-BR": "Enviar",
         "en-US": "Upload"
@@ -84,7 +92,7 @@ TRANSLATIONS: Dict[str, Dict[Language, str]] = {
     },
     "query_button": {
         "pt-BR": "Consultar",
-        "en-US": "Query"
+        "en-US": "Search"
     },
     "query_indicator": {
         "pt-BR": "Processando...",
